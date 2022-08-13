@@ -1,8 +1,8 @@
 '''
 Date: 2022-07-27 21:48:24
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2022-08-07 03:39:11
-FilePath: /python/Dynamixel.py
+LastEditTime: 2022-08-14 06:22:12
+FilePath: /script/Dynamixel.py
 '''
 
 import os 
@@ -146,9 +146,8 @@ class Servo_Class(object):
         # index = 2
         
         # Allocate goal position value into byte array
-        param_goal_position = [DXL_LOBYTE(DXL_LOWORD(dxl_goal_position[0])), DXL_HIBYTE(DXL_LOWORD(dxl_goal_position[0])), DXL_LOBYTE(DXL_HIWORD(dxl_goal_position[1])), DXL_HIBYTE(DXL_HIWORD(dxl_goal_position[1]))]
-
         for dxl_id in self.DXL_ID_List:
+            param_goal_position = [DXL_LOBYTE(DXL_LOWORD(dxl_goal_position[dxl_id-1])), DXL_HIBYTE(DXL_LOWORD(dxl_goal_position[dxl_id-1])), DXL_LOBYTE(DXL_HIWORD(dxl_goal_position[dxl_id-1])), DXL_HIBYTE(DXL_HIWORD(dxl_goal_position[dxl_id-1]))]
             # Add Dynamixel #1 & #2 goal position value to the Syncwrite parameter storage
             dxl_addparam_result = self.groupSyncWrite.addParam(dxl_id, param_goal_position)
             if dxl_addparam_result != True:

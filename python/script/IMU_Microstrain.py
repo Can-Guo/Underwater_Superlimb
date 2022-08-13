@@ -1,7 +1,7 @@
 '''
 Date: 2022-07-27 21:48:16
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2022-08-13 12:47:22
+LastEditTime: 2022-08-13 15:16:23
 FilePath: /python/script/IMU_Microstrain.py
 '''
 
@@ -43,7 +43,7 @@ COM_PORT = '/dev/ttyACM0'
 
 class Microstrain_Class(object):
 
-    def __init__(self, SampleRate: int) -> None:
+    def __init__(self, SampleRate: int = 100) -> None:
         
         try:
             # create Connection with specified USB port and Baud
@@ -108,7 +108,7 @@ class Microstrain_Class(object):
     def createCSV(self, accel = False, euler = True):
         cwd = os.path.abspath('.')
         time_mark = datetime.now()
-        file_name = str(cwd) + '/python/csv/data_' + str(time_mark) + '.csv'
+        file_name = str(cwd) + '/csv/data_' + str(time_mark) + '.csv'
 
         with open( file_name , 'a') as file:
             writer = csv.writer(file, delimiter = ',', quotechar = '"', quoting = csv.QUOTE_MINIMAL)
@@ -121,7 +121,9 @@ class Microstrain_Class(object):
                 writer.writerow(['Timestamp', 'Roll', 'Pitch', 'Yaw'])
 
         file.close()
-
+        
+        print(file_name)
+        
         return file_name
 
 
@@ -169,7 +171,7 @@ class Microstrain_Class(object):
 
     def plotDataCSV(self, csv_file):
         cwd = os.path.abspath('.')
-        csv_file = str(cwd) + '/python/csv/' + csv_file
+        csv_file = str(cwd) + '/csv/' + csv_file
         data_frame = pd.read_csv(csv_file)
 
         frame_number = len(data_frame['Timestamp'])
@@ -262,7 +264,7 @@ class Microstrain_Class(object):
 
         current = datetime.now()
         cwd = os.path.abspath('.')
-        fig_name = str(cwd) + '/python/figure/' + str(current) + '.png'
+        fig_name = str(cwd) + '/figure/' + str(current) + '.png'
         plt.savefig(fig_name,dpi=600)
 
         plt.show()
@@ -382,16 +384,16 @@ class Microstrain_Class(object):
 # accel_enable = True; euler_enable = True
 # Microstrain.configIMUChannel(accel_enable,0,accel_enable)
 
-# parse PacketNumber packet of the data stream
+# 1. parse PacketNumber packet of the data stream
 # Microstrain.parseDataStream_Number(200, 1, accel_enable, accel_enable)
 
-# Record data into CSV file
+# 2. Record data into CSV file
 # Microstrain.recordDataToCSV(0,1)
 
-# plot data into Figure, and save into a PNG image
-# Microstrain.plotDataCSV('data_2022-08-12 12:38:03.566603.csv')
+# 3. plot data into Figure, and save into a PNG image
+# Microstrain.plotDataCSV('data_2022-08-13 15:15:25.822028.csv')
 
-# parse packets of the data stream to update the
+# 4. parse packets of the data stream to update the
 # latest IMU data into Class properties
 # Microstrain.parseDataStrean_Loop(200)
 
