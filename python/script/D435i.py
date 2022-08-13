@@ -1,8 +1,8 @@
 '''
 Date: 2022-07-27 22:43:23
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2022-07-29 15:52:43
-FilePath: /python/D435i.py
+LastEditTime: 2022-08-12 15:38:44
+FilePath: /Underwater_Superlimb/python/script/D435i.py
 '''
 
 import pyrealsense2.pyrealsense2 as rs
@@ -21,8 +21,8 @@ class D435i_Class(object):
         self.pipeline = rs.pipeline()
         self.config = rs.config()
 
-        self.config.enable_stream(rs.stream.accel,rs.format.motion_xyz32f)
-        self.config.enable_stream(rs.stream.gyro, rs.format.motion_xyz32f)
+        self.config.enable_stream(rs.stream.accel,rs.format.motion_xyz32f, 250)
+        self.config.enable_stream(rs.stream.gyro, rs.format.motion_xyz32f, 200)
 
         # initialization of the Data List of IMU
         self.LENGTH = 10
@@ -159,7 +159,7 @@ class D435i_Class(object):
         # accelerometer calculation
         accel_angle_z = math.degrees(math.atan2(accel.y, accel.z))
         accel_angle_x = math.degrees(math.atan2(accel.x, math.sqrt(accel.y**2 + accel.z**2)))
-        accel_angle_y = math.degrees(math.degrees(math.pi))
+        accel_angle_y = math.degrees(math.pi)
 
         # combining gyro-meter and accelerometer angles
         combined_angleX = total_gyro_angleX
@@ -176,7 +176,9 @@ class D435i_Class(object):
 D435i = D435i_Class()
 D435i.start_stream()
 D435i.get_pipeline_frame()
-# D435i.get_IMU_update_Pose()
+
+D435i.start_stream()
+D435i.get_IMU_update_Pose()
 
 ############################
 
