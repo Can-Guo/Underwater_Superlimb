@@ -1,0 +1,1 @@
+/usr/bin/c++   -pthread  -rdynamic CMakeFiles/reading_imu_data.dir/reading_imu_data.cpp.o  -o reading_imu_data  -lrealsense2 

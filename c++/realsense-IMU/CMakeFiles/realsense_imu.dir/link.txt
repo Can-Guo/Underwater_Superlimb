@@ -1,0 +1,1 @@
+/usr/bin/c++   -pthread  -rdynamic CMakeFiles/realsense_imu.dir/realsense_imu_demo.cpp.o  -o realsense_imu  -lglfw /usr/lib/x86_64-linux-gnu/libGL.so -lpython3.6m -lrealsense2 

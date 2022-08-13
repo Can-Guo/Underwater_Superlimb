@@ -1,8 +1,8 @@
 '''
 Date: 2022-07-27 21:48:16
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2022-08-12 16:03:50
-FilePath: /Underwater_Superlimb/python/script/IMU_Microstrain.py
+LastEditTime: 2022-08-13 12:47:22
+FilePath: /python/script/IMU_Microstrain.py
 '''
 
 #  How to run this demo file successfully after you've installed the python3-mscl package.
@@ -29,6 +29,7 @@ import matplotlib.pyplot as plt
 # import the mscl library
 
 import sys
+
 sys.path.append("/usr/share/python3-mscl/")
 import mscl
 
@@ -269,20 +270,59 @@ class Microstrain_Class(object):
         return 
 
 
-    def parseDataStream_Number(self, Timeout_ms: int, PacketNumber):
+    def parseDataStream_Number(self, Timeout_ms: int, PacketNumber, accel_enable=False, euler_enable = True):
 
         try:
             # get all the packets that have been collected, with a timeout of Timeout_ms miliseconds
             packets = self.node.getDataPackets(Timeout_ms, PacketNumber)
 
-            for packet in packets:
-                packet.descriptorSet()  # the descriptor set of the packet
+            if accel_enable == False and euler_enable == True:
 
-                # get all of the points in the packet
-                points = packet.data()
+                for packet in packets:
+                    packet.descriptorSet()  # the descriptor set of the packet
 
-                for dataPoint in points:
-                    print("Data Frame: %-20s" % dataPoint.channelName() + " |  %10s"  % dataPoint.as_string())
+                    # get all of the points in the packet
+                    points = packet.data()
+
+                    for dataPoint in points:
+                        if dataPoint.channelName() == 'roll':
+                            roll = dataPoint.as_float()
+                        if dataPoint.channelName() == 'pitch':
+                            pitch = dataPoint.as_float()
+                        if dataPoint.channelName() == 'yaw':
+                            yaw = dataPoint.as_float()
+
+                print("euler:", roll,pitch,yaw)
+                return [roll,pitch,yaw]
+
+            elif accel_enable == True and euler_enable == True:
+                
+                for packet in packets:
+                    packet.descriptorSet()  # the descriptor set of the packet
+
+                    # get all of the points in the packet
+                    points = packet.data()
+
+                    for dataPoint in points:
+
+                        if dataPoint.channelName() == 'scaledAccelX':
+                            accel_x = dataPoint.as_float()
+                        if dataPoint.channelName() == 'scaledAccelY':
+                            accel_y = dataPoint.as_float()
+                        if dataPoint.channelName() == 'scaledAccelZ':
+                            accel_z = dataPoint.as_float()
+                    
+                        if dataPoint.channelName() == 'roll':
+                            roll = dataPoint.as_float()
+                        if dataPoint.channelName() == 'pitch':
+                            pitch = dataPoint.as_float()
+                        if dataPoint.channelName() == 'yaw':
+                            yaw = dataPoint.as_float()
+
+                # print("Accel and Euler:", accel_x,accel_y,accel_z,roll,pitch,yaw)
+                return [accel_x,accel_y,accel_z,roll,pitch,yaw]
+                
+                    # print("Data Frame: %-20s" % dataPoint.channelName() + " |  %10s"  % dataPoint.as_string())
 
         except mscl.Error as e:
             print("MSCL Error Message: ", e)
@@ -338,17 +378,18 @@ class Microstrain_Class(object):
 
 
 ################################################
-Microstrain = Microstrain_Class(SampleRate=100)
-Microstrain.configIMUChannel(1,0,1)
+# Microstrain = Microstrain_Class(SampleRate=100)
+# accel_enable = True; euler_enable = True
+# Microstrain.configIMUChannel(accel_enable,0,accel_enable)
 
 # parse PacketNumber packet of the data stream
-# Microstrain.parseDataStream_Number(200, 5)
+# Microstrain.parseDataStream_Number(200, 1, accel_enable, accel_enable)
 
 # Record data into CSV file
 # Microstrain.recordDataToCSV(0,1)
 
 # plot data into Figure, and save into a PNG image
-Microstrain.plotDataCSV('data_2022-08-12 12:38:03.566603.csv')
+# Microstrain.plotDataCSV('data_2022-08-12 12:38:03.566603.csv')
 
 # parse packets of the data stream to update the
 # latest IMU data into Class properties
