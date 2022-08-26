@@ -1,8 +1,8 @@
 '''
 Date: 2022-07-27 21:48:46
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2022-08-07 01:27:46
-FilePath: /python/T200_Truster.py
+LastEditTime: 2022-08-14 10:31:22
+FilePath: /script/T200_Truster.py
 '''
 
 import os
@@ -85,6 +85,10 @@ class T200_Class:
 #####################
 # Test of the T200_Class 
 T200 = T200_Class()
+T200.send_T200_PWM_Width([1250,1250])
+
+
+time.sleep(10)
 T200.send_T200_PWM_Width([1500,1500])
 
 #####################

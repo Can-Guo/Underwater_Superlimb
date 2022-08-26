@@ -1,15 +1,15 @@
 '''
 Date: 2022-07-27 21:47:46
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2022-08-14 06:23:03
+LastEditTime: 2022-08-14 09:08:30
 FilePath: /script/run_robot_joystick.py
 '''
 
 
-# from Xbox import XBOX_Class 
+from Xbox import XBOX_Class 
 from IMU_Microstrain import Microstrain_Class 
 # from D435i import D435i_Class 
-# from T200_Truster import POWER, T200_Class 
+from T200_Truster import POWER, T200_Class 
 from Dynamixel import Servo_Class 
 
 import time 
@@ -87,7 +87,7 @@ def T200_Servo_command(input_queue_1):
 
     # initial the control library of T200 Thruster
     T200_thruster = T200_Class()
-    T200_thruster.T200_power_scale = POWER[1]
+    T200_thruster.T200_power_scale = POWER[3]
     T200_thruster.send_T200_PWM_Width([1500, 1500])
     print("Initilize the T200 ...")
 
@@ -230,7 +230,7 @@ def main_process():
 
     # t5.start()
     
-
+ 
     # tick1 = time.time()
 
     # main Thread to Update the plot of the IMU fixed to the Robot and Body

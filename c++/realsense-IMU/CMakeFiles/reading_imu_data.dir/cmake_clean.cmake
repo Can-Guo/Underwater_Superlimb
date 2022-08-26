@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/reading_imu_data.dir/reading_imu_data.cpp.o"
-  "reading_imu_data"
   "reading_imu_data.pdb"
+  "reading_imu_data"
 )
 
 # Per-language clean rules from dependency scanning.

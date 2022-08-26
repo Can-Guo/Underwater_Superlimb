@@ -1,4 +1,4 @@
-# Install script for directory: /home/guoyucan/BionicDL/my_github_project/realsense-IMU
+# Install script for directory: /home/pi/github_project/Underwater_Superlimb/c++/realsense-IMU
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/guoyucan/BionicDL/my_github_project/realsense-IMU/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/pi/github_project/Underwater_Superlimb/c++/realsense-IMU/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

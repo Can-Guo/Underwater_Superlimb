@@ -43,7 +43,7 @@ target_link_libraries(realsense_imu realsense2 )
 # target_link_libraries(realsense_imu ${PYTHON_LIBRARIES})
 
 target_link_libraries(reading_imu_data realsense2)
-
+target_link_libraries(realsense_imu stdc++fs)
 # include_directories(../ ../../common/res ${LZ4_DIR})
 # set_target_properties (realsense_imu PROPERTIES FOLDER Examples)
 # install(TARGETS realsense_imu RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

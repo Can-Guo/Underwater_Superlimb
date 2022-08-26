@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-05-10 09:50:26
  * @LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
- * @LastEditTime: 2022-05-10 09:50:26
+ * @LastEditTime: 2022-08-14 06:57:53
  * @FilePath: /realsense-IMU/matplotlibcpp.h
  */
 
@@ -353,14 +353,14 @@ template <> struct select_npy_type<int64_t> { const static NPY_TYPES type = NPY_
 template <> struct select_npy_type<uint8_t> { const static NPY_TYPES type = NPY_UINT8; };
 template <> struct select_npy_type<uint16_t> { const static NPY_TYPES type = NPY_USHORT; };
 template <> struct select_npy_type<uint32_t> { const static NPY_TYPES type = NPY_ULONG; };
-template <> struct select_npy_type<uint64_t> { const static NPY_TYPES type = NPY_UINT64; };
+// template <> struct select_npy_type<uint64_t> { const static NPY_TYPES type = NPY_UINT64; };
 
 // Sanity checks; comment them out or change the numpy type below if you're compiling on
 // a platform where they don't apply
 static_assert(sizeof(long long) == 8);
-template <> struct select_npy_type<long long> { const static NPY_TYPES type = NPY_INT64; };
+// template <> struct select_npy_type<long long> { const static NPY_TYPES type = NPY_INT64; };
 static_assert(sizeof(unsigned long long) == 8);
-template <> struct select_npy_type<unsigned long long> { const static NPY_TYPES type = NPY_UINT64; };
+// template <> struct select_npy_type<unsigned long long> { const static NPY_TYPES type = NPY_UINT64; };
 
 template<typename Numeric>
 PyObject* get_array(const std::vector<Numeric>& v)

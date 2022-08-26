@@ -1,7 +1,7 @@
 '''
 Date: 2022-07-27 21:48:24
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2022-08-14 06:22:12
+LastEditTime: 2022-08-14 10:28:00
 FilePath: /script/Dynamixel.py
 '''
 
@@ -223,7 +223,7 @@ Servo.enable_Torque()
 time.sleep(1)
 
 # dxl_goal_position = [0,1024,2048,3072]
-dxl_goal_position = [1024*2,1024*2]
+dxl_goal_position = [1,2]
 
 Servo.sync_Write_Angle(dxl_goal_position)
 print("Write Success!")

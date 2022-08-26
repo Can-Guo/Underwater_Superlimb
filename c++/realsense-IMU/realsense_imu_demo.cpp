@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-04-25 16:28:16
  * @LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
- * @LastEditTime: 2022-05-12 08:28:32
+ * @LastEditTime: 2022-08-14 07:31:06
  * @FilePath: /realsense-IMU/realsense_imu_demo.cpp
  */
 
