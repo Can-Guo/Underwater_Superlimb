@@ -1,6 +1,22 @@
 **/__pycache__
+**/.vscode 
 
+# for CMake for C++
+CMkaeLists.txt.user
+CMakeCache.txt 
+CMakeFiles
+CMakeScripts
+Testing 
+Makefile 
+cmake_install.cmake 
+install_manifest.txt 
+complie_commands.json 
+CTestTestfile.cmake 
+_deps 
+
+# ignore the csv file until the naming difference between windows and linux system
 *.csv
 
+# ignore the png file until the naming difference between windows and linux system
 *.png
 
