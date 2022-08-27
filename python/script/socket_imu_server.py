@@ -1,13 +1,13 @@
 '''
 Date: 2022-08-27 00:44:09
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2022-08-27 03:22:02
+LastEditTime: 2022-08-27 19:50:18
 FilePath: /script/socket_imu_server.py
 '''
 
 
 import socket
-localIP     = "192.168.137.9"
+localIP   =  "169.254.10.50"
 localPort   = 54000
 msgFromServer       = "Hello UDP Client!".encode('utf-8')
 
@@ -24,3 +24,4 @@ while(True):
                                                                                                                                                                                                                                                                                                            
     # UDPServerSocket.close()
 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
