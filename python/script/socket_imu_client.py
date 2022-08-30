@@ -1,7 +1,7 @@
 '''
 Date: 2022-08-27 22:00:19
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2022-08-30 20:53:21
+LastEditTime: 2022-08-30 23:26:13
 FilePath: \script\socket_imu_client.py
 '''
 
@@ -23,7 +23,7 @@ UDPClientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 while True:
     UDPClientSocket.sendto(msgFromClient, serverAddressPort)
 
-    msgFromServer = UDPClientSocket.recvfrom(100)
+    msgFromServer = UDPClientSocket.recvfrom(1024)
 
     print("Server IP Address:{}", msgFromServer[1])
     print(format(msgFromServer[0].decode('gbk')))
@@ -31,6 +31,5 @@ while True:
     time.sleep(1)
 
     # UDPClientSocket.close()
-
 
 
