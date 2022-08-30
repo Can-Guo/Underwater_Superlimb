@@ -1,8 +1,8 @@
 '''
 Date: 2022-07-27 21:48:16
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2022-08-13 15:16:23
-FilePath: /python/script/IMU_Microstrain.py
+LastEditTime: 2022-08-30 22:55:54
+FilePath: \script\IMU_Microstrain.py
 '''
 
 #  How to run this demo file successfully after you've installed the python3-mscl package.
@@ -107,7 +107,7 @@ class Microstrain_Class(object):
 
     def createCSV(self, accel = False, euler = True):
         cwd = os.path.abspath('.')
-        time_mark = datetime.now()
+        time_mark = datetime.now()        
         file_name = str(cwd) + '/csv/data_' + str(time_mark) + '.csv'
 
         with open( file_name , 'a') as file:
@@ -382,7 +382,7 @@ class Microstrain_Class(object):
 ################################################
 # Microstrain = Microstrain_Class(SampleRate=100)
 # accel_enable = True; euler_enable = True
-# Microstrain.configIMUChannel(accel_enable,0,accel_enable)
+# Microstrain.configIMUChannel(accel_enable,0,euler_enable)
 
 # 1. parse PacketNumber packet of the data stream
 # Microstrain.parseDataStream_Number(200, 1, accel_enable, accel_enable)
