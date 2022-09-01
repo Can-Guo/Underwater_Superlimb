@@ -1,17 +1,20 @@
 '''
 Date: 2022-09-01 16:54:03
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2022-09-01 20:18:31
+LastEditTime: 2022-09-01 21:16:38
 FilePath: \script\Socket_IMU.py
 '''
 
-from http import server
 import socket
+import platform
 
 from datetime import datetime 
 import os 
 import csv 
-import platform
+
+import pandas as pd 
+import numpy as np 
+import matplotlib.pyplot as plt  
 
 
 ## Differ the system platform for different file path system
@@ -70,19 +73,18 @@ class IMUSocketClass(object):
 
     def decode_imu_data_to_list(self, recv_string_gtk):
 
-        # print(recv_string)
         imu_data_decode = recv_string_gtk.split(',')
         
         return imu_data_decode
 
-
+    ## create a CSV file to save the IMU data
     def create_csv(self):
         cwd = os.path.abspath('.')
         cwd = os.path.dirname(cwd)
 
         time_mark = datetime.now()
-
         time_mark = time_mark.strftime("%Y-%m-%d %H-%M-%S")
+
         if sys_platform == 'windows':
             file_name = str(cwd) + '\csv\imu_data_' + str(time_mark) + '_save.csv'
         elif sys_platform == 'linux':
@@ -99,3 +101,99 @@ class IMUSocketClass(object):
         return file_name
 
 
+    ## Plot the data for a CSV file created by creat_csv() method
+    def plot_csv_data(self, csv_file_name, imu_sample_rate=100):
+        
+        cwd = os.path.abspath('.')
+        cwd = os.path.dirname(cwd)
+
+        if sys_platform == 'windows':
+            csv_file = str(cwd) + '\csv\\' + csv_file_name 
+        elif sys_platform == 'linux':
+            csv_file = str(cwd) + '/csv/' + csv_file_name 
+
+        data_frame = pd.read_csv(csv_file)
+
+        frame_number = len(data_frame['Accel_x'])
+        print("Frame Number inside CSV file: %d" % frame_number)
+        time_sequence = np.linspace(0, frame_number/imu_sample_rate,frame_number)
+
+        # data_frame.drop(['TimeStamp'], axis = 1, inplace= True)
+
+        data_list = np.array(data_frame)
+        
+        accel_x_record = data_list[:,0]
+        accel_y_record = data_list[:,1]
+        accel_z_record = data_list[:,2]
+
+        roll_record = data_list[:,3]
+        pitch_record = data_list[:,4]
+        yaw_record = data_list[:,5]
+
+        plt.figure(figsize=(20,10))
+
+        ax1 = plt.subplot(2,1,1)
+
+        plt.plot(time_sequence, accel_x_record, 'r--', label = 'acceleration_x')
+        plt.plot(time_sequence, accel_y_record, 'g-.', label = 'acceleration_y')
+        plt.plot(time_sequence, accel_z_record, 'b-', label = 'acceleration_z')
+        
+        ax1.set_title("Acceleration in x-y-z axis", fontsize = 20)
+
+        plt.ylim([-2, 2])
+        plt.xlim(time_sequence[0],time_sequence[frame_number-1])
+
+        plt.xticks(fontsize = 10)
+        plt.yticks(fontsize = 10)
+
+        plt.ylabel('Acceleration(g)', fontsize = 15)
+        # plt.xlabel('Time(second)', fontsize = 15)
+
+        plt.legend(fontsize = 15)
+        plt.grid()
+
+        ax2 = plt.subplot(2,1,2)
+
+        plt.plot(time_sequence, roll_record, 'r--', label = 'roll angle')
+        plt.plot(time_sequence, pitch_record, 'g-.', label = 'pitch angle')
+        plt.plot(time_sequence, yaw_record, 'b-', label = 'yaw angle')
+
+        ax2.set_title("Euler Angles", fontsize = 20)
+
+        plt.ylim([-np.pi, np.pi])
+        plt.xlim(time_sequence[0],time_sequence[frame_number-1])
+
+        plt.xticks(fontsize = 10)
+        plt.yticks(fontsize = 10)
+
+        plt.ylabel('Angle (radian)', fontsize = 15)
+        plt.xlabel('Time(second)', fontsize = 15)
+
+        plt.legend(fontsize = 15)
+        plt.grid()
+        
+        current_time = datetime.now()
+        current_time = current_time.strftime("%Y-%m-%d %H-%M-%S")
+
+        cwd = os.path.abspath('.')
+        cwd = os.path.dirname(cwd)
+
+        if sys_platform == 'windows':
+            fig_name = str(cwd) + '\\figure\\' + str(current_time) + '.png' 
+        elif sys_platform == 'linux':
+            fig_name = str(cwd) + '/figure/' + str(current_time) + '.png'
+
+        plt.savefig(fig_name,dpi=600)
+
+        plt.show()
+
+        return fig_name
+
+
+########################################################################
+## 
+# socket_imu = IMUSocketClass()
+# socket_imu.plot_csv_data('imu_data_2022-09-01 18-04-27_save.csv')
+
+## 
+########################################################################

@@ -15,8 +15,8 @@ CTestTestfile.cmake
 _deps 
 
 # ignore the csv file until the naming difference between windows and linux system
-*.csv
+#*.csv
 
 # ignore the png file until the naming difference between windows and linux system
-*.png
+#*.png
 

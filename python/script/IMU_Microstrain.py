@@ -1,7 +1,7 @@
 '''
 Date: 2022-07-27 21:48:16
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2022-09-01 17:28:48
+LastEditTime: 2022-09-01 21:16:28
 FilePath: \script\IMU_Microstrain.py
 '''
 
@@ -269,7 +269,7 @@ class Microstrain_Class(object):
 
         plt.show()
 
-        return 
+        return fig_name
 
 
     def parseDataStream_Number(self, Timeout_ms: int, PacketNumber, accel_enable=False, euler_enable = True):
