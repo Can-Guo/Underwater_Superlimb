@@ -1,7 +1,7 @@
 '''
 Date: 2022-08-27 22:00:19
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2022-09-01 20:43:57
+LastEditTime: 2022-09-01 21:50:48
 FilePath: \script\socket_imu_client.py
 '''
 
@@ -13,10 +13,7 @@ FilePath: \script\socket_imu_client.py
 # '''
 
 
-import csv
-
 from Socket_IMU import IMUSocketClass 
-# from datetime import datetime 
 
 ###################################################################
 ## Test the Socket_IMU Class, Client
@@ -37,20 +34,10 @@ msgFromServer = IMUSocket_client.UDPClientSocket.recvfrom(1024)
 print("Server IP Address:{}".format(msgFromServer[1]))
 
 
-while True:
-    IMUSocket_client.UDPClientSocket.sendto(msgFromClient, serverAddressPort)
-    msgFromServer = IMUSocket_client.UDPClientSocket.recvfrom(1024)
+## 3. record imu data into a CSV file
+IMUSocket_client.record_csv_data(csv_file_name)
 
-    with open(csv_file_name, 'a', newline='') as file :
-
-        print(format(msgFromServer[0].decode('gbk')))
-
-        imu_data_decode = IMUSocket_client.decode_imu_data_to_list(msgFromServer[0].decode('gbk'))
-        writer = csv.DictWriter(file, fieldnames=['Accel_x', 'Accel_y', 'Accel_z', 'Roll', 'Pitch', 'Yaw','Timestamp', ])
-        writer.writerow({'Accel_x':imu_data_decode[0],'Accel_y':imu_data_decode[1],'Accel_z':imu_data_decode[2],'Roll':imu_data_decode[3],'Pitch':imu_data_decode[4],'Yaw':imu_data_decode[5],'Timestamp':imu_data_decode[6]})
-
-    # UDPClientSocket.close()
-
-    file.close()
+## 4. plot the imu data from a CSV file created before by record_csv_file() Method
+# IMUSocket_client.plot_csv_data('imu_data_2022-09-01 21-44-18_save.csv')
 
 ###################################################################

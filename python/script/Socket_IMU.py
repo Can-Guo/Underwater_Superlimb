@@ -1,7 +1,7 @@
 '''
 Date: 2022-09-01 16:54:03
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2022-09-01 21:16:38
+LastEditTime: 2022-09-01 21:48:11
 FilePath: \script\Socket_IMU.py
 '''
 
@@ -32,6 +32,9 @@ class IMUSocketClass(object):
 
     def __init__(self, local_ip="169.254.10.50", local_port=54000, server_or = 1):
 
+        self.serverAddressPort = (local_ip, local_port)
+        self.msgFromClient = "Hello, UDP Server. This is Client from PC!".encode('utf-8')
+        
         try:
             self.UDPServerSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             self.UDPClientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -46,20 +49,10 @@ class IMUSocketClass(object):
             print("UDP Initialization Failed! Please check your ip and port!\r\n")
 
 
-    ## Get the data and send to other computer.
-    
-    def sendback_imu_data(self):
-
-        # 3. formate the imu data
-
-        # 4. send back to PC or Ubuntu
-
-        return
-
-
-    ## 
+    ## Encode imu data, from list into a string with comma symbol
 
     def encode_imu_data_to_str(self, number_list):
+        
         send_string = str('')
         for data in number_list:
             send_string = send_string + str(data) + ','
@@ -77,7 +70,9 @@ class IMUSocketClass(object):
         
         return imu_data_decode
 
+
     ## create a CSV file to save the IMU data
+
     def create_csv(self):
         cwd = os.path.abspath('.')
         cwd = os.path.dirname(cwd)
@@ -101,9 +96,30 @@ class IMUSocketClass(object):
         return file_name
 
 
-    ## Plot the data for a CSV file created by creat_csv() method
-    def plot_csv_data(self, csv_file_name, imu_sample_rate=100):
+    ## record IMU data into a CSV file create by creat_csv() method
+    def record_csv_data(self, csv_file_name):        
         
+        while True:
+
+            self.UDPClientSocket.sendto(self.msgFromClient, self.serverAddressPort)
+            msgFromServer = self.UDPClientSocket.recvfrom(1024)
+
+            with open(csv_file_name, 'a', newline='') as file :
+
+                print(format(msgFromServer[0].decode('gbk')))
+
+                imu_data_decode = self.decode_imu_data_to_list(msgFromServer[0].decode('gbk'))
+                writer = csv.DictWriter(file, fieldnames=['Accel_x', 'Accel_y', 'Accel_z', 'Roll', 'Pitch', 'Yaw','Timestamp', ])
+                writer.writerow({'Accel_x':imu_data_decode[0],'Accel_y':imu_data_decode[1],'Accel_z':imu_data_decode[2],'Roll':imu_data_decode[3],'Pitch':imu_data_decode[4],'Yaw':imu_data_decode[5],'Timestamp':imu_data_decode[6]})
+
+            # UDPClientSocket.close()
+
+            file.close()
+
+
+    ## Plot the data for a CSV file recorded by
+    def plot_csv_data(self, csv_file_name, imu_sample_rate=100):
+
         cwd = os.path.abspath('.')
         cwd = os.path.dirname(cwd)
 
@@ -191,9 +207,13 @@ class IMUSocketClass(object):
 
 
 ########################################################################
-## 
+## Class Testing Begins!
 # socket_imu = IMUSocketClass()
-# socket_imu.plot_csv_data('imu_data_2022-09-01 18-04-27_save.csv')
 
-## 
+# csv_file_name = socket_imu.create_csv()
+# socket_imu.record_csv_data(csv_file_name)
+
+# socket_imu.plot_csv_data('imu_data_2022-09-01 21-44-18_save.csv')
+
+## END
 ########################################################################
