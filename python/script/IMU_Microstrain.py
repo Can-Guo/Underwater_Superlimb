@@ -1,7 +1,7 @@
 '''
 Date: 2022-07-27 21:48:16
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2022-08-30 22:55:54
+LastEditTime: 2022-09-01 17:28:48
 FilePath: \script\IMU_Microstrain.py
 '''
 

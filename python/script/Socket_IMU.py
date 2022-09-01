@@ -1,8 +1,8 @@
 '''
 Date: 2022-09-01 16:54:03
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2022-09-01 17:09:16
-FilePath: /script/Socket_IMU.py
+LastEditTime: 2022-09-01 20:18:31
+FilePath: \script\Socket_IMU.py
 '''
 
 from http import server
@@ -31,7 +31,8 @@ class IMUSocketClass(object):
 
         try:
             self.UDPServerSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            
+            self.UDPClientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
             if server_or == 1:
                 self.UDPServerSocket.bind((local_ip, local_port))
                 print("Socket Server Initialization is Successfyl!\r\n")
@@ -67,11 +68,12 @@ class IMUSocketClass(object):
 
     ## imu data as string, convert into number list
 
-    def decode_imu_data_to_list(self, recv_string):
+    def decode_imu_data_to_list(self, recv_string_gtk):
 
-        print(recv_string)
+        # print(recv_string)
+        imu_data_decode = recv_string_gtk.split(',')
         
-        return 
+        return imu_data_decode
 
 
     def create_csv(self):
@@ -88,9 +90,9 @@ class IMUSocketClass(object):
 
         # print(file_name)
 
-        with open(file_name, 'a') as file:
+        with open(file_name, 'a', newline='') as file:
             writer = csv.writer(file, delimiter = ',', quotechar = '"', quoting = csv.QUOTE_MINIMAL)
-            writer.writerow(['Timestamp', 'Accel_x', 'Accel_y', 'Accel_z', 'Roll', 'Pitch', 'Yaw'])
+            writer.writerow(['Accel_x', 'Accel_y', 'Accel_z', 'Roll', 'Pitch', 'Yaw', 'Timestamp', ])
 
         file.close()
 
