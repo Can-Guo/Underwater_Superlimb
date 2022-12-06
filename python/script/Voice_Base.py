@@ -1,7 +1,7 @@
 '''
 Date: 2022-11-14 16:28:57
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2022-11-24 01:44:45
+LastEditTime: 2022-12-06 20:28:33
 FilePath: /script/Voice_Base.py
 '''
 
@@ -10,6 +10,7 @@ import pyaudio
 from scipy.io import wavfile
 import matplotlib.pyplot as plt 
 import numpy as np 
+import noisereduce as nr
 
 # plt.rcParams['font.family'] = ['sans-serif']
 # plt.rcParams['font.sans-serif'] = ['SimHei']
@@ -453,12 +454,26 @@ class Voice_Base(object):
         return voiceseg, vsl, SF, NF, amp, zcr
 
 
+    def noise_reduce(self, voice_data, noise_data=[], sample_rate=16000):
+        
+        if voice_data == []:
+            print("Parameter Errors for Noice Reduction! Please Check your voice data!")
+        elif voice_data != [] and noise_data == []:
+            reduced_voice_data = nr.reduce_noise(y=voice_data, sr=sample_rate)
+        elif voice_data != [] and noise_data != []:
+            reduced_voice_data = nr.reduce_noise(y=voice_data, y_noise=noise_data, sr=sample_rate)
+        else:
+            print("Please check noise reduction parameters!\r\n")
+
+        return reduced_voice_data
+
+
 ##############################
 # Test the Class Methods
 AU = Voice_Base(path='./wav/test_2.8_help.wav')
 
 ####
-## 功能 1: Record Audio
+# # 功能 1: Record Audio
 # AU.audiorecorder()
 
 ####
@@ -466,24 +481,44 @@ AU = Voice_Base(path='./wav/test_2.8_help.wav')
 ## 功能 2: Read Audio File, into data in list
 data_two, fs, n_bits= AU.audioread()
 # AU.soundplot()
-data= data_two[:,1]   # 选择其中一个轨道的数据
+data_one= data_two[:,1]   # 选择其中一个轨道的数据
+
 # AU.SPL(data=data[:,1],fs=fs)
 
-
 ####
-# 功能 3: 短时计算短时能量, 短时平均幅度,短时自相关
+## 功能3: Noise Reduction
+reduced_data = AU.noise_reduce(voice_data=data_one, sample_rate=16000)
+reduced_data /= np.max(reduced_data) # 归一化数据尺度
+data_one /= np.max(data_one)  # 归一化数据尺度
+
+N = len(data_one)
+time = [i / fs for i in range(N)]
+
+fig = plt.figure(figsize=(16, 13))
+
+plt.subplot(2, 1, 1)
+plt.plot(time, data_one)
+plt.title('(a) Voice_Waveform')
+
+plt.subplot(2, 1, 2)
+plt.plot(time,reduced_data)
+plt.title('(b) Voice_Waveform_After_NoiceReduction')
+
+
+###
+# 功能 4: 短时计算短时能量, 短时平均幅度,短时自相关
 # inc = 100
 # wlen = 200
 # win = AU.hanning_window(wlen)
-# N = len(data)
+# N = len(reduced_data)
 # time = [i / fs for i in range(N)]
 
 # ## 短时能量
-# EN = AU.STEn(data, win, inc) 
+# EN = AU.STEn(reduced_data, win, inc) 
 # ## 短时平均幅度
-# Mn = AU.STMn(data, win, inc)
+# Mn = AU.STMn(reduced_data, win, inc)
 
-# X = AU.enframe(data, win, inc)
+# X = AU.enframe(reduced_data, win, inc)
 # X = X.T
 # ## 短时自相关
 # Ac = AU.STAc(X)
@@ -494,7 +529,7 @@ data= data_two[:,1]   # 选择其中一个轨道的数据
 # fig = plt.figure(figsize=(16, 13))
 
 # plt.subplot(3, 1, 1)
-# plt.plot(time, data)
+# plt.plot(time, reduced_data)
 # plt.title('(a)Voice_Waveform')
 
 # plt.subplot(3, 1, 2)
@@ -507,9 +542,9 @@ data= data_two[:,1]   # 选择其中一个轨道的数据
 # plt.title('(c)Short_Time_Energy_Spectrum')
 
 # # 显示图片
-# # plt.show()
-# # 保存图片
+# plt.show()
 
+# 保存图片
 # plt.savefig('images/wave_energy_corr_Help.png')
 ####
 
@@ -517,53 +552,57 @@ data= data_two[:,1]   # 选择其中一个轨道的数据
 ####
 ## 功能4: 语音端点检测
 # data, fs, n_bits = AU.audioread()
-data /= np.max(data)
+# data /= np.max(data)  # 归一化数据尺度
 
-N = len(data)
-wlen = 200
-inc = 80
-IS = 0.1
-overlap = wlen - inc 
-NIS = int((IS* fs - wlen) // inc+1)
-fn = (N- wlen ) // inc + 1
+# N = len(reduced_data)
+# wlen = 200
+# inc = 80
+# IS = 0.1
+# overlap = wlen - inc 
+# NIS = int((IS* fs - wlen) // inc+1)
+# fn = (N- wlen ) // inc + 1
 
-frameTime = AU.FrameTimeC(fn, wlen, inc, fs)
-time = [i / fs for i in range(N)]
+# frameTime = AU.FrameTimeC(fn, wlen, inc, fs)
+# time = [i / fs for i in range(N)]
 
-voiceseg, vsl, SF, NF, amp, zcr = AU.vad_TwoThr(data, wlen, inc, NIS)
+# voiceseg, vsl, SF, NF, amp, zcr = AU.vad_TwoThr(reduced_data, wlen, inc, NIS)
 
-fig2 = plt.figure(figsize=(20, 15))
+# print("VoiceSeg\r\n: ", voiceseg)
+# print("VSL: %d \r\n" % vsl)
 
-plt.subplot(3, 1, 1) 
-plt.plot(time, data)
-plt.xlabel("Time(s)")
-plt.ylabel("Amplitude")
+# # fig2 = plt.figure(figsize=(20, 15))
+# plt.figure()
 
-plt.subplot(3, 1, 2)
-plt.plot(frameTime, amp)
-plt.xlabel("Time(s)")
-plt.ylabel("Short Time Energy")
+# plt.subplot(3, 1, 1) 
+# plt.plot(time, reduced_data)
+# plt.xlabel("Time(s)")
+# plt.ylabel("Amplitude")
 
-plt.subplot(3, 1, 3)
-plt.plot(frameTime, zcr)
-plt.xlabel("Time(s)")
-plt.ylabel("Short Time Zero-Crossing")
+# plt.subplot(3, 1, 2)
+# plt.plot(frameTime, amp)
+# plt.xlabel("Time(s)")
+# plt.ylabel("Short Time Energy")
 
-for i in range(vsl):
-    plt.subplot(3, 1, 1)
-    plt.plot(frameTime[voiceseg[i]['start']], 0, 'ok')
-    plt.plot(frameTime[voiceseg[i]['end']], 0, 'or')
+# plt.subplot(3, 1, 3)
+# plt.plot(frameTime, zcr)
+# plt.xlabel("Time(s)")
+# plt.ylabel("Short Time Zero-Crossing")
+
+# for i in range(vsl):
+#     plt.subplot(3, 1, 1)
+#     plt.plot(frameTime[voiceseg[i]['start']], 0, 'ok')
+#     plt.plot(frameTime[voiceseg[i]['end']], 0, 'or')
 
 
-    plt.subplot(3, 1, 2)
-    plt.plot(frameTime, amp, 'b')
-    plt.plot(frameTime[voiceseg[i]['start']], 0, 'ok')
-    plt.plot(frameTime[voiceseg[i]['end']], 0, 'or')
+#     plt.subplot(3, 1, 2)
+#     plt.plot(frameTime, amp, 'b')
+#     plt.plot(frameTime[voiceseg[i]['start']], 0, 'ok')
+#     plt.plot(frameTime[voiceseg[i]['end']], 0, 'or')
 
-    plt.subplot(3, 1, 3)
-    plt.plot(frameTime, zcr, 'b')
-    plt.plot(frameTime[voiceseg[i]['start']], 0, 'ok')
-    plt.plot(frameTime[voiceseg[i]['end']], 0, 'or')
+#     plt.subplot(3, 1, 3)
+#     plt.plot(frameTime, zcr, 'b')
+#     plt.plot(frameTime[voiceseg[i]['start']], 0, 'ok')
+#     plt.plot(frameTime[voiceseg[i]['end']], 0, 'or')
 
 plt.show()
 
