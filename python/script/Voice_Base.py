@@ -1,7 +1,7 @@
 '''
 Date: 2022-11-14 16:28:57
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2022-12-06 20:28:33
+LastEditTime: 2022-12-08 00:51:25
 FilePath: /script/Voice_Base.py
 '''
 
@@ -40,7 +40,7 @@ class Voice_Base(object):
             None
         '''
         
-        stream = self.pa.open(format=formater, channels=channels, rate=rate, input=True, input_device_index=15,  frames_per_buffer=frames_per_buffer)
+        stream = self.pa.open(format=formater, channels=channels, rate=rate, input=True, input_device_index=7,  frames_per_buffer=frames_per_buffer)
         print("Microphone is Recording……")
         frames = []
 
@@ -342,21 +342,98 @@ class Voice_Base(object):
         return ((ll - 1) * inc + frameLen / 2) / fs
 
 
+    def vad_revr(self, dst1, T1, T2):
+        """
+        端点检测反向比较函数
+        :param dst1:
+        :param T1:
+        :param T2:
+        :return:
+        """
+        fn = len(dst1)
+        maxsilence = 8
+        minlen = 5
+        status = 0
+        count = np.zeros(fn)
+        silence = np.zeros(fn)
+        xn = 0
+        x1 = np.zeros(fn)
+        x2 = np.zeros(fn)
+        for n in range(1, fn):
+            if status == 0 or status == 1:
+                if dst1[n] < T2:
+                    x1[xn] = max(1, n - count[xn] - 1)
+                    status = 2
+                    silence[xn] = 0
+                    count[xn] += 1
+                elif dst1[n] < T1:
+                    status = 1
+                    count[xn] += 1
+                else:
+                    status = 0
+                    count[xn] = 0
+                    x1[xn] = 0
+                    x2[xn] = 0
+            if status == 2:
+                if dst1[n] < T1:
+                    count[xn] += 1
+                else:
+                    silence[xn] += 1
+                    if silence[xn] < maxsilence:
+                        count[xn] += 1
+                    elif count[xn] < minlen:
+                        status = 0
+                        silence[xn] = 0
+                        count[xn] = 0
+                    else:
+                        status = 3
+                        x2[xn] = x1[xn] + count[xn]
+            if status == 3:
+                status = 0
+                xn += 1
+                count[xn] = 0
+                silence[xn] = 0
+                x1[xn] = 0
+                x2[xn] = 0
+        el = len(x1[:xn])
+        if x1[el - 1] == 0:
+            el -= 1
+        if x2[el - 1] == 0:
+            print('Error: Not find endding point!\n')
+            x2[el] = fn
+        SF = np.zeros(fn)
+        NF = np.ones(fn)
+        for i in range(el):
+            SF[int(x1[i]):int(x2[i])] = 1
+            NF[int(x1[i]):int(x2[i])] = 0
+        # voiceseg = self.findSegment(np.where(SF == 1)[0])
+        start, end, duration = self.findSegment(np.where(SF == 1)[0])
+        # vsl = len(voiceseg.keys())
+        vsl = len(start)
+        return start, end, duration, vsl, SF, NF
+
+
     def findSegment(self, express):
         """
-        分割成语音片段
-        :param express:
-        :return:
+        函数功能:分割成语音片段
+        Input Param:
+            express:
+        Return:
+            voiceseg -- 包含所有语音片段的起始点和结束点,持续时间等信息
         """
         if express[0] == 0:
             voiceIndex = np.where(express)
         else:
             voiceIndex = express
         d_voice = np.where(np.diff(voiceIndex) > 1)[0]
-        voiceseg = {}
+        # voiceseg = {}
+        # index = 0  # index to label the voiceseg
+        start = []
+        end = []
+        duration = []
         if len(d_voice) > 0:
-            for i in range(len(d_voice) + 1):
-                seg = {}
+            for i in range(len(d_voice) + 1):                
+                # seg = {}
                 if i == 0:
                     st = voiceIndex[0]
                     en = voiceIndex[d_voice[i]]
@@ -366,21 +443,72 @@ class Voice_Base(object):
                 else:
                     st = voiceIndex[d_voice[i - 1]+1]
                     en = voiceIndex[d_voice[i]]
-                seg['start'] = st
-                seg['end'] = en
-                seg['duration'] = en - st + 1
-                voiceseg[i] = seg
-        return voiceseg
+                # seg['start'] = st
+                # seg['end'] = en
+                # seg['duration'] = en - st + 1
+
+                if (en-st+1) >= 25:
+                    # voiceseg[index] = seg
+                    # index = index + 1
+                    start.append(st)
+                    end.append(en)
+                    duration.append(en-st+1)
+
+        # return voiceseg
+        print(start)
+        print(end)
+        print(duration)
+        return start, end, duration
+
+    def vad_specEN(self, data, wnd, inc, NIS, thr1, thr2, fs):
+        # import matplotlib.pyplot as plt
+        from scipy.signal import medfilt
+        x = self.enframe(data, wnd, inc)
+        X = np.abs(np.fft.fft(x, axis=1))
+        if len(wnd) == 1:
+            wlen = wnd
+        else:
+            wlen = len(wnd)
+        df = fs / wlen
+        fx1 = int(250 // df + 1)  # 250Hz位置
+        fx2 = int(3500 // df + 1)  # 500Hz位置
+        km = wlen // 8
+        K = 0.5
+        E = np.zeros((X.shape[0], wlen // 2))
+        E[:, fx1 + 1:fx2 - 1] = X[:, fx1 + 1:fx2 - 1]
+        E = np.multiply(E, E)
+        Esum = np.sum(E, axis=1, keepdims=True)
+        P1 = np.divide(E, Esum)
+        E = np.where(P1 >= 0.9, 0, E)
+        Eb0 = E[:, 0::4]
+        Eb1 = E[:, 1::4]
+        Eb2 = E[:, 2::4]
+        Eb3 = E[:, 3::4]
+        Eb = Eb0 + Eb1 + Eb2 + Eb3
+        prob = np.divide(Eb + K, np.sum(Eb + K, axis=1, keepdims=True))
+        Hb = -np.sum(np.multiply(prob, np.log10(prob + 1e-10)), axis=1)
+        for i in range(10):
+            Hb = medfilt(Hb, 5)
+        Me = np.mean(Hb)
+        eth = np.mean(Hb[:NIS])
+        Det = eth - Me
+        T1 = thr1 * Det + Me
+        T2 = thr2 * Det + Me
+        # voiceseg, vsl, SF, NF = self.vad_revr(Hb, T1, T2)
+        start, end, duration, vsl, SF, NF = self.vad_revr(Hb, T1, T2)
+        return start, end, duration, vsl, SF, NF, Hb
 
 
     def vad_TwoThr(self, x, wlen, inc, NIS):
         """
-        使用双门限法检测语音段
-        :param x: 语音信号
-        :param wlen: 分帧长度
-        :param inc: 帧移
-        :param NIS:
-        :return:
+        函数功能:使用双门限法检测语音段
+        Input Param:
+            x: 语音信号
+            wlen: 分帧长度
+            inc: 帧移
+            NIS:
+        Return:
+
         """
         maxsilence = 15
         minlen = 5
@@ -442,20 +570,32 @@ class Voice_Base(object):
         if x1[el - 1] == 0:
             el -= 1
         if x2[el - 1] == 0:
-            print('Error: Not find endding point!\n')
+            print('Error: Not find ending point!\n')
             x2[el] = fn
         SF = np.zeros(fn)
         NF = np.ones(fn)
         for i in range(el):
             SF[int(x1[i]):int(x2[i])] = 1
             NF[int(x1[i]):int(x2[i])] = 0
-        voiceseg = self.findSegment(np.where(SF == 1)[0])
-        vsl = len(voiceseg.keys())
-        return voiceseg, vsl, SF, NF, amp, zcr
+        # voiceseg = self.findSegment(np.where(SF == 1)[0])
+        start, end, duration = self.findSegment(np.where(SF == 1)[0])
+        # vsl = len(voiceseg.keys())
+        vsl = len(start)
+        return start, end, duration, vsl, SF, NF, amp, zcr
 
 
     def noise_reduce(self, voice_data, noise_data=[], sample_rate=16000):
-        
+        """
+        函数功能: 为输入的语音信号降噪   
+        Input Param:
+            voice_data --  声音数据, list
+            noise_data -- 噪声数据, list(可选参数)
+            sample_rate -- 声音或噪声数据的采样率,默认是16000样本/s
+        Return:
+            reduced_voice_data -- 返回的经过降噪且归一化的数据, list
+
+        """
+
         if voice_data == []:
             print("Parameter Errors for Noice Reduction! Please Check your voice data!")
         elif voice_data != [] and noise_data == []:
@@ -465,16 +605,23 @@ class Voice_Base(object):
         else:
             print("Please check noise reduction parameters!\r\n")
 
+        # print("Type", type(reduced_voice_data))
+        reduced_voice_data /= np.max(reduced_voice_data) # 归一化数据尺度
+
+        # for i in range(len(reduced_voice_data)):
+        #     if np.abs(reduced_voice_data[i]) <= 0.015:
+        #         reduced_voice_data[i] = 0.0
+
         return reduced_voice_data
 
 
 ##############################
 # Test the Class Methods
-AU = Voice_Base(path='./wav/test_2.8_help.wav')
+AU = Voice_Base(path='./wav_word/test_3.1_forward.wav')
 
 ####
 # # 功能 1: Record Audio
-# AU.audiorecorder()
+# AU.audiorecorder(len=60)
 
 ####
 
@@ -488,22 +635,22 @@ data_one= data_two[:,1]   # 选择其中一个轨道的数据
 ####
 ## 功能3: Noise Reduction
 reduced_data = AU.noise_reduce(voice_data=data_one, sample_rate=16000)
-reduced_data /= np.max(reduced_data) # 归一化数据尺度
+# reduced_data /= np.max(reduced_data) # 归一化数据尺度
 data_one /= np.max(data_one)  # 归一化数据尺度
 
-N = len(data_one)
-time = [i / fs for i in range(N)]
+# N = len(data_one)
+# time = [i / fs for i in range(N)]
 
-fig = plt.figure(figsize=(16, 13))
+# fig = plt.figure(figsize=(16, 13))
 
-plt.subplot(2, 1, 1)
-plt.plot(time, data_one)
-plt.title('(a) Voice_Waveform')
+# plt.subplot(2, 1, 1)
+# plt.plot(time, data_one)
+# plt.title('(a) Voice_Waveform')
 
-plt.subplot(2, 1, 2)
-plt.plot(time,reduced_data)
-plt.title('(b) Voice_Waveform_After_NoiceReduction')
-
+# plt.subplot(2, 1, 2)
+# plt.plot(time,reduced_data)
+# plt.title('(b) Voice_Waveform_After_NoiceReduction')
+# plt.show()
 
 ###
 # 功能 4: 短时计算短时能量, 短时平均幅度,短时自相关
@@ -550,63 +697,103 @@ plt.title('(b) Voice_Waveform_After_NoiceReduction')
 
 
 ####
-## 功能4: 语音端点检测
+## 功能4: 语音端点检测(双门限法)
 # data, fs, n_bits = AU.audioread()
 # data /= np.max(data)  # 归一化数据尺度
 
-# N = len(reduced_data)
+N = len(reduced_data)
+wlen = 200
+inc = 80
+IS = 0.1
+overlap = wlen - inc 
+NIS = int((IS* fs - wlen) // inc+1)
+fn = (N- wlen ) // inc + 1
+
+frameTime = AU.FrameTimeC(fn, wlen, inc, fs)
+time = [i / fs for i in range(N)]
+
+Start, End, Duration, vsl, SF, NF, amp, zcr = AU.vad_TwoThr(reduced_data, wlen, inc, NIS)
+
+Frame_zero = np.zeros(len(Start))
+Frame_start = []
+Frame_end  = []
+for i in range(len(Start)):
+    Frame_start.append(frameTime[Start[i]])
+    Frame_end.append(frameTime[End[i]])
+
+plt.figure(figsize=(20, 15))
+
+plt.subplot(3, 1, 1) 
+plt.plot(time, reduced_data)
+plt.plot(Frame_start, Frame_zero, 'ok', )
+plt.plot(Frame_end, Frame_zero, 'or')
+plt.xlabel("Time(s)")
+plt.ylabel("Amplitude")
+
+plt.subplot(3, 1, 2)
+plt.plot(frameTime, amp)
+plt.plot(Frame_start, Frame_zero, 'ok', )
+plt.plot(Frame_end, Frame_zero, 'or')
+plt.xlabel("Time(s)")
+plt.ylabel("Short Time Energy")
+
+plt.subplot(3, 1, 3)
+plt.plot(frameTime, zcr)
+plt.plot(Frame_start, Frame_zero, 'ok', )
+plt.plot(Frame_end, Frame_zero, 'or')
+plt.xlabel("Time(s)")
+plt.ylabel("Short Time Zero-Crossing")
+
+
+print("VoiceSeg: \r\n ", Duration)
+
+
+####
+## 功能5: 语音端点检测(Spectral Entropy Method)
+# data, fs, n_bits = AU.audioread()
+# data /= np.max(data)  # 归一化数据尺度
+# IS = 0.25
 # wlen = 200
 # inc = 80
-# IS = 0.1
-# overlap = wlen - inc 
-# NIS = int((IS* fs - wlen) // inc+1)
-# fn = (N- wlen ) // inc + 1
-
-# frameTime = AU.FrameTimeC(fn, wlen, inc, fs)
+# N = len(reduced_data)
 # time = [i / fs for i in range(N)]
+# wnd = np.hamming(wlen)
+# overlap = wlen - inc
+# NIS = int((IS * fs - wlen) // inc + 1)
+# thr1 = 0.99
+# thr2 = 0.98
 
-# voiceseg, vsl, SF, NF, amp, zcr = AU.vad_TwoThr(reduced_data, wlen, inc, NIS)
+# Start, End, Duration, vsl, SF, NF, Enm = AU.vad_specEN(reduced_data, wnd, inc, NIS, thr1, thr2, fs)
 
-# print("VoiceSeg\r\n: ", voiceseg)
-# print("VSL: %d \r\n" % vsl)
+# fn = len(SF)
+# frameTime = AU.FrameTimeC(fn, wlen, inc, fs)
 
-# # fig2 = plt.figure(figsize=(20, 15))
-# plt.figure()
+# Frame_zero = np.zeros(len(Start))
+# Frame_start = []
+# Frame_end  = []
 
-# plt.subplot(3, 1, 1) 
+# for i in range(len(Start)):
+#     Frame_start.append(frameTime[Start[i]])
+#     Frame_end.append(frameTime[End[i]])
+
+# plt.figure(figsize=(20, 15))
+
+# plt.subplot(2, 1, 1)
 # plt.plot(time, reduced_data)
-# plt.xlabel("Time(s)")
-# plt.ylabel("Amplitude")
+# plt.plot(Frame_start, Frame_zero, 'ok', )
+# plt.plot(Frame_end, Frame_zero, 'or')
+# plt.legend(['signal','start','end'])
 
-# plt.subplot(3, 1, 2)
-# plt.plot(frameTime, amp)
-# plt.xlabel("Time(s)")
-# plt.ylabel("Short Time Energy")
+# plt.subplot(2, 1, 2)
+# plt.plot(frameTime, Enm, 'g')
+# plt.plot(Frame_start, Frame_zero, 'ok', )
+# plt.plot(Frame_end, Frame_zero, 'or')
+# plt.legend(['Spectral Entropy','start','end'])
+# plt.xlabel('Time/s')
+print("VSL:%d" % vsl)
 
-# plt.subplot(3, 1, 3)
-# plt.plot(frameTime, zcr)
-# plt.xlabel("Time(s)")
-# plt.ylabel("Short Time Zero-Crossing")
-
-# for i in range(vsl):
-#     plt.subplot(3, 1, 1)
-#     plt.plot(frameTime[voiceseg[i]['start']], 0, 'ok')
-#     plt.plot(frameTime[voiceseg[i]['end']], 0, 'or')
-
-
-#     plt.subplot(3, 1, 2)
-#     plt.plot(frameTime, amp, 'b')
-#     plt.plot(frameTime[voiceseg[i]['start']], 0, 'ok')
-#     plt.plot(frameTime[voiceseg[i]['end']], 0, 'or')
-
-#     plt.subplot(3, 1, 3)
-#     plt.plot(frameTime, zcr, 'b')
-#     plt.plot(frameTime[voiceseg[i]['start']], 0, 'ok')
-#     plt.plot(frameTime[voiceseg[i]['end']], 0, 'or')
-
+plt.savefig('images/single_word_twoThre_1207/3.1_forward_left_single_word.png')
 plt.show()
-
-# plt.savefig('images/TwoThr.png')
 # plt.close()
 ####
 
