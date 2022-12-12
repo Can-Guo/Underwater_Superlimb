@@ -1,7 +1,7 @@
 '''
 Date: 2022-11-14 16:28:57
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2022-12-12 10:35:25
+LastEditTime: 2022-12-12 20:09:03
 FilePath: /script/Voice_Base.py
 '''
 
@@ -11,6 +11,9 @@ from scipy.io import wavfile
 import matplotlib.pyplot as plt 
 import numpy as np 
 import noisereduce as nr
+
+import librosa 
+import librosa.display
 
 # plt.rcParams['font.family'] = ['sans-serif']
 # plt.rcParams['font.sans-serif'] = ['SimHei']
@@ -455,9 +458,10 @@ class Voice_Base(object):
                     duration.append(en-st+1)
 
         # return voiceseg
-        print(start)
-        print(end)
-        print(duration)
+        print("Start",start)
+        print("End",end)
+        print("Duration",duration)
+
         return start, end, duration
 
     def vad_specEN(self, data, wnd, inc, NIS, thr1, thr2, fs):
@@ -709,6 +713,8 @@ overlap = wlen - inc  # 窗口重叠部分的长度
 NIS = int((IS* fs - wlen) // inc+1)
 fn = (N- wlen ) // inc + 1
 
+print("N:",fn)
+
 frameTime = AU.FrameTimeC(fn, wlen, inc, fs)
 time = [i / fs for i in range(N)]
 
@@ -721,31 +727,49 @@ for i in range(len(Start)):
     Frame_start.append(frameTime[Start[i]])
     Frame_end.append(frameTime[End[i]])
 
-plt.figure(figsize=(20, 15))
+data_seg_1 = []
+time_seg_1 = []
 
-plt.subplot(3, 1, 1) 
-plt.plot(time, reduced_data)
-plt.plot(Frame_start, Frame_zero, 'ok', )
-plt.plot(Frame_end, Frame_zero, 'or')
-plt.xlabel("Time(s)")
-plt.ylabel("Amplitude")
+for i in range(vsl):
+# i = 2
+    plt.figure(figsize=(20,10))
+    data_seg_1 = reduced_data[ (int)(frameTime[Start[i]] * fs) : (int)(frameTime[End[i]] *fs) ]
+    time_seg_1 = np.linspace(frameTime[Start[i]],frameTime[End[i]], len(data_seg_1))
+    # plt.plot(time_seg_1, data_seg_1)
+    mfccs = librosa.feature.mfcc(data_seg_1, fs)
+    print("MFCC.Shape: ", mfccs.shape)
+    
+    librosa.display.specshow(mfccs, sr=fs, x_axis='time', y_axis='mel')
+    plt.colorbar(format="%+2.f")
+    # plt.show()
+    plt.savefig('images/mfccs_image_1212/3.1_forward_mfcc_seg_{}.png'.format(i))
+    plt.close()
 
-plt.subplot(3, 1, 2)
-plt.plot(frameTime, amp)
-plt.plot(Frame_start, Frame_zero, 'ok', )
-plt.plot(Frame_end, Frame_zero, 'or')
-plt.xlabel("Time(s)")
-plt.ylabel("Short Time Energy")
+# plt.figure(figsize=(20, 15))
 
-plt.subplot(3, 1, 3)
-plt.plot(frameTime, zcr)
-plt.plot(Frame_start, Frame_zero, 'ok', )
-plt.plot(Frame_end, Frame_zero, 'or')
-plt.xlabel("Time(s)")
-plt.ylabel("Short Time Zero-Crossing")
+# plt.subplot(3, 1, 1) 
+# plt.plot(time, reduced_data)
+# plt.plot(Frame_start, Frame_zero, 'ok', )
+# plt.plot(Frame_end, Frame_zero, 'or')
+# plt.xlabel("Time(s)")
+# plt.ylabel("Amplitude")
 
-print("VSL:%d" % vsl)
-print("VoiceSeg: \r\n ", Duration)
+# plt.subplot(3, 1, 2)
+# plt.plot(frameTime, amp)
+# plt.plot(Frame_start, Frame_zero, 'ok', )
+# plt.plot(Frame_end, Frame_zero, 'or')
+# plt.xlabel("Time(s)")
+# plt.ylabel("Short Time Energy")
+
+# plt.subplot(3, 1, 3)
+# plt.plot(frameTime, zcr)
+# plt.plot(Frame_start, Frame_zero, 'ok', )
+# plt.plot(Frame_end, Frame_zero, 'or')
+# plt.xlabel("Time(s)")
+# plt.ylabel("Short Time Zero-Crossing")
+
+# print("VSL:%d" % vsl)
+# print("VoiceSeg: \r\n ", Duration)
 
 
 ####
