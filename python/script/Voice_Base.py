@@ -1,7 +1,7 @@
 '''
 Date: 2022-11-14 16:28:57
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2022-12-08 00:51:25
+LastEditTime: 2022-12-12 10:35:25
 FilePath: /script/Voice_Base.py
 '''
 
@@ -703,9 +703,9 @@ data_one /= np.max(data_one)  # 归一化数据尺度
 
 N = len(reduced_data)
 wlen = 200
-inc = 80
+inc = 150
 IS = 0.1
-overlap = wlen - inc 
+overlap = wlen - inc  # 窗口重叠部分的长度
 NIS = int((IS* fs - wlen) // inc+1)
 fn = (N- wlen ) // inc + 1
 
@@ -744,7 +744,7 @@ plt.plot(Frame_end, Frame_zero, 'or')
 plt.xlabel("Time(s)")
 plt.ylabel("Short Time Zero-Crossing")
 
-
+print("VSL:%d" % vsl)
 print("VoiceSeg: \r\n ", Duration)
 
 
@@ -790,9 +790,9 @@ print("VoiceSeg: \r\n ", Duration)
 # plt.plot(Frame_end, Frame_zero, 'or')
 # plt.legend(['Spectral Entropy','start','end'])
 # plt.xlabel('Time/s')
-print("VSL:%d" % vsl)
+# print("VSL:%d" % vsl)
 
-plt.savefig('images/single_word_twoThre_1207/3.1_forward_left_single_word.png')
+# plt.savefig('images/single_word_twoThre_1207/3.1_forward_left_single_word.png')
 plt.show()
 # plt.close()
 ####
