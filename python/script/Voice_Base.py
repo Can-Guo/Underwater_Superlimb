@@ -1,10 +1,12 @@
 '''
 Date: 2022-11-14 16:28:57
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2022-12-15 14:36:01
+LastEditTime: 2022-12-21 00:22:18
 FilePath: /script/Voice_Base.py
 '''
 
+import csv 
+import pandas as pd 
 import wave 
 import pyaudio 
 from scipy.io import wavfile
@@ -63,8 +65,9 @@ class Voice_Base(object):
         wf.setsampwidth(self.pa.get_sample_size(formater))
         wf.setframerate(rate)
         wf.writeframes(b''.join(frames))
+        # wf.writeframes(data.tostring())
         wf.close()
-    
+
 
     def audiowrite(self, data, fs, binary = True, channel = 1, path=[]):
         '''
@@ -85,7 +88,8 @@ class Voice_Base(object):
             wf = wave.open(path,'wb')
             wf.setframerate(fs)
             wf.setnchannels(channel)
-            wf.setsampwidth(2)
+            wf.setsampwidth(self.pa.get_sample_size(pyaudio.paInt32
+            ))
             wf.writeframes(b''.join(data))
         else:
             wavfile.write(path,fs,data)
@@ -93,7 +97,7 @@ class Voice_Base(object):
 
     def audioread(self, path=[], return_nbits=True, formater='sample'):
         '''
-                函数功能:读取语音文件,返回语音数据data,采样率fs,数据位数bits
+        函数功能:读取语音文件,返回语音数据data,采样率fs,数据位数bits
         Input Param:
             formater:获取数据的格式,为sample时,数据为float32的[-1,1],
                      否则为文件本身的数据格式指定formater为任意非sample字符串,则返回原始数据
@@ -112,14 +116,40 @@ class Voice_Base(object):
                 fs, data, bits = wavfile.read(path)
             else:
                 fs, data = wavfile.read(path)
-
+        
         if formater == 'sample':
+            # print("Raw Data Example:", data[0:50,1])
+            print("bits: ", bits)
+            print("SampleWidth:",self.pa.get_sample_size(pyaudio.paInt16))
             data = data/(2**(bits-1))
         if return_nbits:
             return data, fs, bits 
         else:
             return data, fs
     
+    def write_csv(audio_data, csv_path, n_seg, tag='do'):
+        '''
+        write audio data list into CSV file, each column as a piece of data
+        Input Params:
+            audio_data: the audio data list, (n,1) , just for single channel 
+            csv_path: the path of the CSV file, a string
+        Return:
+            None
+        '''
+        # cwd = os.path.abspath('.')
+        # time_mark = datetime.now()        
+        # file_name = str(cwd) + '/csv/data_' + str(time_mark) + '.csv'
+        write_row = []
+        for i in range(n_seg):
+            write_row.append(tag+'_{}'.format(i))
+
+        with open( csv_path , 'a') as file:
+            writer = csv.writer(file, lineterminator='\n')
+            writer.writerow(write_row)
+            # writer.writerows([])
+
+
+
 
     def soundplot(self, data=[], samplerate=16000, size=(14,5)):
         """
@@ -299,7 +329,7 @@ class Voice_Base(object):
 
     def STMn(self, x, win, inc):
         """
-        计算短时平均幅度计算函数
+        根据计算公式计算短时平均幅度函数
         :param x:
         :param win:
         :param inc:
@@ -312,7 +342,7 @@ class Voice_Base(object):
 
     def STZcr(self, x, win, inc, delta=0):
         """
-        计算短时过零率
+        根据计算公式计算短时过零率
         :param x:
         :param win:
         :param inc:
@@ -330,7 +360,7 @@ class Voice_Base(object):
 
     def STAmdf(self, X):
         """
-        计算短时幅度差，好像有点问题
+        根据计算公式计算短时幅度差，好像有点问题
         :param X:
         :return:
         """
@@ -347,6 +377,9 @@ class Voice_Base(object):
 
 
     def FrameTimeC(self, frameNum, frameLen, inc, fs):
+        '''
+        帧与实际时间计算
+        '''
         ll = np.array([i for i in range(frameNum)])
         return ((ll - 1) * inc + frameLen / 2) / fs
 
@@ -470,8 +503,9 @@ class Voice_Base(object):
 
         return start, end, duration
 
+
     def vad_specEN(self, data, wnd, inc, NIS, thr1, thr2, fs):
-        # import matplotlib.pyplot as plt
+
         from scipy.signal import medfilt
         x = self.enframe(data, wnd, inc)
         X = np.abs(np.fft.fft(x, axis=1))
@@ -628,19 +662,28 @@ class Voice_Base(object):
 
 ##############################
 # Test the Class Methods
-AU = Voice_Base(path='./wav_voice_1213/wav_single_pitch_1215/test_do.wav')
+AU = Voice_Base(path='./wav_voice_1213/wav_single_pitch_1215/test_do_3.wav')
 
 ####
 # # 功能 1: Record Audio
-# AU.audiorecorder(len=10)
-
+# AU.audiorecorder(len=60)
 
 ####
-
 ## 功能 2: Read Audio File, into data in list
-data_two, fs, n_bits= AU.audioread()
+data_Two, fs, n_bits= AU.audioread()
 # AU.soundplot()
-data_one= data_two[:,1]   # 选择其中一个轨道的数据
+data_one= data_Two[:,1]   # 选择其中一个轨道的数据
+data_two= data_Two[:,0]  # 选择其中一个轨道的数据
+
+
+# path_wav_file='/home/guoyucan/BionicDL/my_github_project/Underwater_Superlimb/python/script/wav_voice_1213/wav_single_pitch_1215/test_do_raw_voice_1.wav'
+# data_two_int = np.zeros(len(data_Two))
+# print("Length ", len(data_Two))
+# for i in range(len(data_Two)):
+#     data_two_int[i] = ((int) (data_Two[i] * (2**(n_bits)-1)))
+
+# AU.audiowrite(data=data_two_int,fs=16000,binary=True, channel=1,path=path_wav_file)
+# print("FrameRate:",fs)
 
 # data_noise, fs, n_bits = AU.audioread(path='./wav_voice_1213/wav_single_pitch_1215/test_noise_sample.wav')
 # data_noise = data_noise[:,1]
@@ -651,21 +694,21 @@ data_one= data_two[:,1]   # 选择其中一个轨道的数据
 ## 功能3: Noise Reduction
 reduced_data = AU.noise_reduce(voice_data=data_one, sample_rate=16000)
 # reduced_data = AU.noise_reduce(voice_data=reduced_data, sample_rate=16000)
-data_one /= np.max(data_one)  # 归一化数据尺度
+# data_One /= np.max(data_One)  # 归一化数据尺度
 
-N = len(data_one)
-time = [i / fs for i in range(N)]
+# N = len(data_one)
+# time = [i / fs for i in range(N)]
 
-fig = plt.figure(figsize=(16, 13))
+# fig = plt.figure(figsize=(16, 13))
 
-plt.subplot(2, 1, 1)
-plt.plot(time, data_one)
-plt.title('(a) Voice_Waveform')
+# plt.subplot(3, 1, 1)
+# plt.plot(time, data_one)
+# plt.title('(a) Voice_Waveform (Raw Data)')
 
-plt.subplot(2, 1, 2)
-plt.plot(time,reduced_data)
-plt.title('(b) Voice_Waveform_After_NoiceReduction')
-plt.show()
+# plt.subplot(3, 1, 3)
+# plt.plot(time,reduced_data)
+# plt.title('(b) Voice_Waveform_After_NoiceReduction')
+# plt.show()
 
 ###
 # 功能 4: 短时计算短时能量, 短时平均幅度,短时自相关
@@ -716,27 +759,27 @@ plt.show()
 # data, fs, n_bits = AU.audioread()
 # data /= np.max(data)  # 归一化数据尺度
 
-# N = len(reduced_data)
-# wlen = 200
-# inc = 190
-# IS = 0.1
-# overlap = wlen - inc  # 窗口重叠部分的长度
-# NIS = int((IS* fs - wlen) // inc+1)
-# fn = (N- wlen ) // inc + 1
+N = len(reduced_data)
+wlen = 200
+inc = 190
+IS = 0.1
+overlap = wlen - inc  # 窗口重叠部分的长度
+NIS = int((IS* fs - wlen) // inc+1)
+fn = (N- wlen ) // inc + 1
 
-# print("N:",fn)
+print("N:",fn)
 
-# frameTime = AU.FrameTimeC(fn, wlen, inc, fs)
-# time = [i / fs for i in range(N)]
+frameTime = AU.FrameTimeC(fn, wlen, inc, fs)
+time = [i / fs for i in range(N)]
 
-# Start, End, Duration, vsl, SF, NF, amp, zcr = AU.vad_TwoThr(reduced_data, wlen, inc, NIS)
+Start, End, Duration, vsl, SF, NF, amp, zcr = AU.vad_TwoThr(reduced_data, wlen, inc, NIS)
 
-# Frame_zero = np.zeros(len(Start))
-# Frame_start = []
-# Frame_end  = []
-# for i in range(len(Start)):
-#     Frame_start.append(frameTime[Start[i]])
-#     Frame_end.append(frameTime[End[i]])
+Frame_zero = np.zeros(len(Start))
+Frame_start = []
+Frame_end  = []
+for i in range(len(Start)):
+    Frame_start.append(frameTime[Start[i]])
+    Frame_end.append(frameTime[End[i]])
 
 # data_seg_1 = []
 # time_seg_1 = []
@@ -758,100 +801,100 @@ plt.show()
 #     plt.savefig('images/mfccs_image_1212/3.1_forward_mfcc_seg_{}.png'.format(i))
 #     plt.close()
 
-# plt.figure(figsize=(20, 15))
+plt.figure(figsize=(20, 15))
 
-# plt.subplot(3, 1, 1) 
-# plt.plot(time, reduced_data)
-# plt.plot(Frame_start, Frame_zero, 'ok', )
-# plt.plot(Frame_end, Frame_zero, 'or')
-# plt.xlabel("Time(s)")
-# plt.ylabel("Amplitude")
+plt.subplot(3, 1, 1) 
+plt.plot(time, reduced_data)
+plt.plot(Frame_start, Frame_zero, 'ok', )
+plt.plot(Frame_end, Frame_zero, 'or')
+plt.xlabel("Time(s)")
+plt.ylabel("Amplitude")
 
-# plt.subplot(3, 1, 2)
-# plt.plot(frameTime, amp)
-# plt.plot(Frame_start, Frame_zero, 'ok', )
-# plt.plot(Frame_end, Frame_zero, 'or')
-# plt.xlabel("Time(s)")
-# plt.ylabel("Short Time Energy")
+plt.subplot(3, 1, 2)
+plt.plot(frameTime, amp)
+plt.plot(Frame_start, Frame_zero, 'ok', )
+plt.plot(Frame_end, Frame_zero, 'or')
+plt.xlabel("Time(s)")
+plt.ylabel("Short Time Energy")
 
-# plt.subplot(3, 1, 3)
-# plt.plot(frameTime, zcr)
-# plt.plot(Frame_start, Frame_zero, 'ok', )
-# plt.plot(Frame_end, Frame_zero, 'or')
-# plt.xlabel("Time(s)")
-# plt.ylabel("Short Time Zero-Crossing")
-
-# print("VSL:%d" % vsl)
-# print("VoiceSeg: \r\n ", Duration)
+plt.subplot(3, 1, 3)
+plt.plot(frameTime, zcr)
+plt.plot(Frame_start, Frame_zero, 'ok', )
+plt.plot(Frame_end, Frame_zero, 'or')
+plt.xlabel("Time(s)")
+plt.ylabel("Short Time Zero-Crossing")
+plt.show()
+print("VSL:%d" % vsl)
+print("VoiceSeg: \r\n ", Duration)
 
 
 ####
 ## 功能5: 语音端点检测(Spectral Entropy Method)
 # data, fs, n_bits = AU.audioread()
 # data /= np.max(data)  # 归一化数据尺度
-IS = 0.25
-wlen = 200
-inc = 150
-N = len(reduced_data)
-time = [i / fs for i in range(N)]
-wnd = np.hamming(wlen)
-overlap = wlen - inc
-NIS = int((IS * fs - wlen) // inc + 1)
-thr1 = 0.99
-thr2 = 0.98
+# IS = 0.25
+# wlen = 200
+# inc = 150
+# N = len(reduced_data)
+# time = [i / fs for i in range(N)]
+# wnd = np.hamming(wlen)
+# overlap = wlen - inc
+# NIS = int((IS * fs - wlen) // inc + 1)
+# thr1 = 0.99
+# thr2 = 0.98
 
-Start, End, Duration, vsl, SF, NF, Enm = AU.vad_specEN(reduced_data, wnd, inc, NIS, thr1, thr2, fs)
+# Start, End, Duration, vsl, SF, NF, Enm = AU.vad_specEN(reduced_data, wnd, inc, NIS, thr1, thr2, fs)
 
-fn = len(SF)
-frameTime = AU.FrameTimeC(fn, wlen, inc, fs)
+# fn = len(SF)
+# frameTime = AU.FrameTimeC(fn, wlen, inc, fs)
 
-Frame_zero = np.zeros(len(Start))
-Frame_start = []
-Frame_end  = []
+# Frame_zero = np.zeros(len(Start))
+# Frame_start = []
+# Frame_end  = []
 
-for i in range(len(Start)):
-    Frame_start.append(frameTime[Start[i]])
-    Frame_end.append(frameTime[End[i]])
+# for i in range(len(Start)):
+#     Frame_start.append(frameTime[Start[i]])
+#     Frame_end.append(frameTime[End[i]])
 
 
-data_seg_1 = []
-time_seg_1 = []
+# data_seg_1 = []
+# time_seg_1 = []
 
-for i in range(vsl):
-# i = 2
-    plt.figure(figsize=(20,10))
-    data_seg_1 = reduced_data[ (int)(frameTime[Start[i]] * fs) : (int)(frameTime[End[i]] *fs) ]
-    path_wav_file='/home/guoyucan/BionicDL/my_github_project/Underwater_Superlimb/python/script/wav_voice_1213/wav_single_pitch_1215/do_wav/do_{}.wav'.format(i)
-    AU.audiowrite(data=data_seg_1,fs=16000,binary=True, channel=1,path=path_wav_file)
-    time_seg_1 = np.linspace(frameTime[Start[i]],frameTime[End[i]], len(data_seg_1))
-    # plt.plot(time_seg_1, data_seg_1)
-    mfccs = librosa.feature.mfcc(data_seg_1, fs)
-    print("MFCC.Shape: ", mfccs.shape)
+# for i in range(vsl):
+# # i = 2
+#     plt.figure(figsize=(20,10))
+#     data_seg_1 = reduced_data[ (int)(frameTime[Start[i]] * fs) : (int)(frameTime[End[i]] *fs) ]
+#     path_wav_file='/home/guoyucan/BionicDL/my_github_project/Underwater_Superlimb/python/script/wav_voice_1213/wav_single_pitch_1215/do_wav/do_{}.wav'.format(i)
+#     AU.audiowrite(data=data_seg_1,fs=16000,binary=True, channel=1,path=path_wav_file)
+#     time_seg_1 = np.linspace(frameTime[Start[i]],frameTime[End[i]], len(data_seg_1))
+#     # plt.plot(time_seg_1, data_seg_1)
+#     mfccs = librosa.feature.mfcc(data_seg_1, fs)
+#     print("MFCC.Shape: ", mfccs.shape)
     
-    librosa.display.specshow(mfccs, sr=fs, x_axis='time', y_axis='mel')
-    plt.colorbar(format="%+2.f")
-    # plt.show()
-    plt.savefig('images/mfccs_single_voice_1215/4.2_do_{}_mfcc.png'.format(i))
-    plt.close()
+#     librosa.display.specshow(mfccs, sr=fs, x_axis='time', y_axis='mel')
+#     plt.colorbar(format="%+2.f")
+#     # plt.show()
+#     plt.savefig('images/mfccs_single_voice_1215/4.2_do_{}_mfcc.png'.format(i))
+#     plt.close()
 
 
-plt.figure(figsize=(20, 15))
+# plt.figure(figsize=(20, 15))
 
-plt.subplot(2, 1, 1)
-plt.plot(time, reduced_data)
-plt.plot(Frame_start, Frame_zero, 'ok', )
-plt.plot(Frame_end, Frame_zero, 'or')
-plt.legend(['signal','start','end'])
+# plt.subplot(2, 1, 1)
+# plt.plot(time, reduced_data)
+# plt.plot(Frame_start, Frame_zero, 'ok', )
+# plt.plot(Frame_end, Frame_zero, 'or')
+# plt.legend(['signal','start','end'])
 
-plt.subplot(2, 1, 2)
-plt.plot(frameTime, Enm, 'g')
-plt.plot(Frame_start, Frame_zero, 'ok', )
-plt.plot(Frame_end, Frame_zero, 'or')
-plt.legend(['Spectral Entropy','start','end'])
-plt.xlabel('Time/s')
-print("VSL:%d" % vsl)
-plt.savefig('images/mfccs_single_voice_1215/do_mfcc/4.2_do_seg.png')
-plt.show()
+# plt.subplot(2, 1, 2)
+# plt.plot(frameTime, Enm, 'g')
+# plt.plot(Frame_start, Frame_zero, 'ok', )
+# plt.plot(Frame_end, Frame_zero, 'or')
+# plt.legend(['Spectral Entropy','start','end'])
+# plt.xlabel('Time/s')
+# print("VSL:%d" % vsl)
+# plt.savefig('images/mfccs_single_voice_1215/do_mfcc/4.2_do_seg.png')
+# plt.show()
 
 
 
