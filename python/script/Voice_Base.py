@@ -1,7 +1,7 @@
 '''
 Date: 2022-11-14 16:28:57
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2022-12-21 00:22:18
+LastEditTime: 2023-01-16 21:49:30
 FilePath: /script/Voice_Base.py
 '''
 
@@ -17,17 +17,39 @@ import noisereduce as nr
 import librosa 
 import librosa.display
 
-# plt.rcParams['font.family'] = ['sans-serif']
-# plt.rcParams['font.sans-serif'] = ['SimHei']
-# plt.rcParams['axes.unicode_minus'] = False
+##
+# To remove the ALSA lib error messages:
+# https://stackoverflow.com/questions/7088672/pyaudio-working-but-spits-out-error-messages-each-time
+from ctypes import *
+from contextlib import contextmanager
+# import pyaudio
+
+ERROR_HANDLER_FUNC = CFUNCTYPE(None, c_char_p, c_int, c_char_p, c_int, c_char_p)
+
+def py_error_handler(filename, line, function, err, fmt):
+    pass
+
+c_error_handler = ERROR_HANDLER_FUNC(py_error_handler)
+
+@contextmanager
+def noalsaerr():
+    asound = cdll.LoadLibrary('libasound.so')
+    asound.snd_lib_error_set_handler(c_error_handler)
+    yield
+    asound.snd_lib_error_set_handler(None)
+
+##
 
 class Voice_Base(object):
     
     def __init__(self, path=[]):
-        self.pa = pyaudio.PyAudio()
+        with noalsaerr():
+            self.pa = pyaudio.PyAudio()
 
         for i in range(self.pa.get_device_count()):
             if(self.pa.get_device_info_by_host_api_device_index(0,i).get('maxInputChannels')) > 0:
+                if(self.pa.get_device_info_by_host_api_device_index(0,i).get('name') == 'default'):
+                    self.device_ID = i
                 print('Input Device ID', i, '-', self.pa.get_device_info_by_host_api_device_index(0,i).get('name'))
         self.path = path
 
@@ -44,8 +66,7 @@ class Voice_Base(object):
         Return:
             None
         '''
-        
-        stream = self.pa.open(format=formater, channels=channels, rate=rate, input=True, input_device_index=7,  frames_per_buffer=frames_per_buffer)
+        stream = self.pa.open(format=formater, channels=channels, rate=rate, input=True, input_device_index=self.device_ID,  frames_per_buffer=frames_per_buffer)
         print("Microphone is Recording……")
         frames = []
 
@@ -652,8 +673,8 @@ class Voice_Base(object):
         # print("Type", type(reduced_voice_data))
 
         # 前2秒噪声置零, 最后1秒置零
-        reduced_voice_data[:(int)(2.0*16000)] = 0.0
-        reduced_voice_data[(int)(59.0*16000):] = 0.0
+        # reduced_voice_data[:(int)(2.0*16000)] = 0.0
+        # reduced_voice_data[(int)(59.0*16000):] = 0.0
 
         reduced_voice_data /= np.max(reduced_voice_data) # 归一化数据尺度
 
@@ -662,18 +683,18 @@ class Voice_Base(object):
 
 ##############################
 # Test the Class Methods
-AU = Voice_Base(path='./wav_voice_1213/wav_single_pitch_1215/test_do_3.wav')
+AU = Voice_Base(path='./wav_voice_1213/wav_single_pitch_1215/test_device_3_default_ID_15_6.wav')
 
 ####
 # # 功能 1: Record Audio
-# AU.audiorecorder(len=60)
+AU.audiorecorder(len=10)
 
 ####
 ## 功能 2: Read Audio File, into data in list
 data_Two, fs, n_bits= AU.audioread()
-# AU.soundplot()
+# # AU.soundplot()
 data_one= data_Two[:,1]   # 选择其中一个轨道的数据
-data_two= data_Two[:,0]  # 选择其中一个轨道的数据
+# data_two= data_Two[:,0]  # 选择其中一个轨道的数据
 
 
 # path_wav_file='/home/guoyucan/BionicDL/my_github_project/Underwater_Superlimb/python/script/wav_voice_1213/wav_single_pitch_1215/test_do_raw_voice_1.wav'
@@ -694,21 +715,21 @@ data_two= data_Two[:,0]  # 选择其中一个轨道的数据
 ## 功能3: Noise Reduction
 reduced_data = AU.noise_reduce(voice_data=data_one, sample_rate=16000)
 # reduced_data = AU.noise_reduce(voice_data=reduced_data, sample_rate=16000)
-# data_One /= np.max(data_One)  # 归一化数据尺度
+data_one /= np.max(data_one)  # 归一化数据尺度
 
-# N = len(data_one)
-# time = [i / fs for i in range(N)]
+N = len(data_one)
+time = [i / fs for i in range(N)]
 
-# fig = plt.figure(figsize=(16, 13))
+fig = plt.figure(figsize=(16, 13))
 
-# plt.subplot(3, 1, 1)
-# plt.plot(time, data_one)
-# plt.title('(a) Voice_Waveform (Raw Data)')
+plt.subplot(2, 1, 1)
+plt.plot(time, data_one)
+plt.title('(a) Voice_Waveform (Raw Data)')
 
-# plt.subplot(3, 1, 3)
-# plt.plot(time,reduced_data)
-# plt.title('(b) Voice_Waveform_After_NoiceReduction')
-# plt.show()
+plt.subplot(2, 1, 2)
+plt.plot(time,reduced_data)
+plt.title('(b) Voice_Waveform_After_NoiceReduction')
+plt.show()
 
 ###
 # 功能 4: 短时计算短时能量, 短时平均幅度,短时自相关
@@ -759,27 +780,27 @@ reduced_data = AU.noise_reduce(voice_data=data_one, sample_rate=16000)
 # data, fs, n_bits = AU.audioread()
 # data /= np.max(data)  # 归一化数据尺度
 
-N = len(reduced_data)
-wlen = 200
-inc = 190
-IS = 0.1
-overlap = wlen - inc  # 窗口重叠部分的长度
-NIS = int((IS* fs - wlen) // inc+1)
-fn = (N- wlen ) // inc + 1
+# N = len(reduced_data)
+# wlen = 200
+# inc = 190
+# IS = 0.1
+# overlap = wlen - inc  # 窗口重叠部分的长度
+# NIS = int((IS* fs - wlen) // inc+1)
+# fn = (N- wlen ) // inc + 1
 
-print("N:",fn)
+# print("N:",fn)
 
-frameTime = AU.FrameTimeC(fn, wlen, inc, fs)
-time = [i / fs for i in range(N)]
+# frameTime = AU.FrameTimeC(fn, wlen, inc, fs)
+# time = [i / fs for i in range(N)]
 
-Start, End, Duration, vsl, SF, NF, amp, zcr = AU.vad_TwoThr(reduced_data, wlen, inc, NIS)
+# Start, End, Duration, vsl, SF, NF, amp, zcr = AU.vad_TwoThr(reduced_data, wlen, inc, NIS)
 
-Frame_zero = np.zeros(len(Start))
-Frame_start = []
-Frame_end  = []
-for i in range(len(Start)):
-    Frame_start.append(frameTime[Start[i]])
-    Frame_end.append(frameTime[End[i]])
+# Frame_zero = np.zeros(len(Start))
+# Frame_start = []
+# Frame_end  = []
+# for i in range(len(Start)):
+#     Frame_start.append(frameTime[Start[i]])
+#     Frame_end.append(frameTime[End[i]])
 
 # data_seg_1 = []
 # time_seg_1 = []
@@ -801,31 +822,31 @@ for i in range(len(Start)):
 #     plt.savefig('images/mfccs_image_1212/3.1_forward_mfcc_seg_{}.png'.format(i))
 #     plt.close()
 
-plt.figure(figsize=(20, 15))
+# plt.figure(figsize=(20, 15))
 
-plt.subplot(3, 1, 1) 
-plt.plot(time, reduced_data)
-plt.plot(Frame_start, Frame_zero, 'ok', )
-plt.plot(Frame_end, Frame_zero, 'or')
-plt.xlabel("Time(s)")
-plt.ylabel("Amplitude")
+# plt.subplot(3, 1, 1) 
+# plt.plot(time, reduced_data)
+# plt.plot(Frame_start, Frame_zero, 'ok', )
+# plt.plot(Frame_end, Frame_zero, 'or')
+# plt.xlabel("Time(s)")
+# plt.ylabel("Amplitude")
 
-plt.subplot(3, 1, 2)
-plt.plot(frameTime, amp)
-plt.plot(Frame_start, Frame_zero, 'ok', )
-plt.plot(Frame_end, Frame_zero, 'or')
-plt.xlabel("Time(s)")
-plt.ylabel("Short Time Energy")
+# plt.subplot(3, 1, 2)
+# plt.plot(frameTime, amp)
+# plt.plot(Frame_start, Frame_zero, 'ok', )
+# plt.plot(Frame_end, Frame_zero, 'or')
+# plt.xlabel("Time(s)")
+# plt.ylabel("Short Time Energy")
 
-plt.subplot(3, 1, 3)
-plt.plot(frameTime, zcr)
-plt.plot(Frame_start, Frame_zero, 'ok', )
-plt.plot(Frame_end, Frame_zero, 'or')
-plt.xlabel("Time(s)")
-plt.ylabel("Short Time Zero-Crossing")
-plt.show()
-print("VSL:%d" % vsl)
-print("VoiceSeg: \r\n ", Duration)
+# plt.subplot(3, 1, 3)
+# plt.plot(frameTime, zcr)
+# plt.plot(Frame_start, Frame_zero, 'ok', )
+# plt.plot(Frame_end, Frame_zero, 'or')
+# plt.xlabel("Time(s)")
+# plt.ylabel("Short Time Zero-Crossing")
+# plt.show()
+# print("VSL:%d" % vsl)
+# print("VoiceSeg: \r\n ", Duration)
 
 
 ####

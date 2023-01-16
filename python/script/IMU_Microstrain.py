@@ -1,8 +1,8 @@
 '''
 Date: 2022-07-27 21:48:16
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2022-09-01 21:16:28
-FilePath: \script\IMU_Microstrain.py
+LastEditTime: 2023-01-13 10:45:22
+FilePath: /script/IMU_Microstrain.py
 '''
 
 #  How to run this demo file successfully after you've installed the python3-mscl package.
@@ -26,6 +26,8 @@ from datetime import datetime
 import csv 
 import pandas as pd 
 import matplotlib.pyplot as plt  
+import scienceplots 
+plt.style.use(['science','no-latex'])
 # import the mscl library
 
 import sys
@@ -81,6 +83,7 @@ class Microstrain_Class(object):
 
 
     def setToIdle(self):
+        print("Set to IDLE is done!\n")
         return self.node.setToIdle()
 
 
@@ -108,7 +111,7 @@ class Microstrain_Class(object):
     def createCSV(self, accel = False, euler = True):
         cwd = os.path.abspath('.')
         time_mark = datetime.now()        
-        file_name = str(cwd) + '/csv/data_' + str(time_mark) + '.csv'
+        file_name = str(cwd) + '/csv_imu/data_' + str(time_mark) + '.csv'
 
         with open( file_name , 'a') as file:
             writer = csv.writer(file, delimiter = ',', quotechar = '"', quoting = csv.QUOTE_MINIMAL)
@@ -171,10 +174,11 @@ class Microstrain_Class(object):
 
     def plotDataCSV(self, csv_file):
         cwd = os.path.abspath('.')
-        csv_file = str(cwd) + '/csv/' + csv_file
+        CSV_file_name = csv_file
+        csv_file = str(cwd) + '/csv_imu/' + csv_file
         data_frame = pd.read_csv(csv_file)
 
-        frame_number = len(data_frame['Timestamp'])
+        frame_number = len(data_frame['Acceleration_x'])
         print("frame number:", frame_number)
         time_sequence = np.linspace(0, frame_number/self.SampleRate, frame_number)
 
@@ -191,7 +195,7 @@ class Microstrain_Class(object):
             roll_record = data_list[:,0]
             pitch_record = data_list[:,1]
             yaw_record = data_list[:,2]
-
+            
             plt.figure(figsize=[20,10])
 
             plt.plot(time_sequence, roll_record, 'r--', label = 'roll angle')
@@ -220,6 +224,7 @@ class Microstrain_Class(object):
             pitch_record = data_list[:,4]
             yaw_record = data_list[:,5]
 
+            # with plt.style.context(['science','no-latex']):
             plt.figure(figsize=(20,10))
 
             ax1 = plt.subplot(2,1,1)
@@ -240,7 +245,7 @@ class Microstrain_Class(object):
             plt.xlabel('Time(second)', fontsize = 15)
 
             plt.legend(fontsize = 15)
-            plt.grid()
+            # plt.grid()
 
             ax2 = plt.subplot(2,1,2)
 
@@ -259,12 +264,12 @@ class Microstrain_Class(object):
             plt.ylabel('Angle (radian)', fontsize = 15)
             plt.xlabel('Time(second)', fontsize = 15)
 
-            plt.legend(fontsize = 15)
-            plt.grid()
+            ax2.legend(fontsize = 15)
+            # plt.grid()
 
-        current = datetime.now()
+        # current = datetime.now()
         cwd = os.path.abspath('.')
-        fig_name = str(cwd) + '/figure/' + str(current) + '.png'
+        fig_name = str(cwd) + '/image_imu/' + str(CSV_file_name) + '.png'
         plt.savefig(fig_name,dpi=600)
 
         plt.show()
@@ -380,7 +385,8 @@ class Microstrain_Class(object):
 
 
 ################################################
-# Microstrain = Microstrain_Class(SampleRate=100)
+Microstrain = Microstrain_Class(SampleRate=100)
+Microstrain.setToIdle()
 # accel_enable = True; euler_enable = True
 # Microstrain.configIMUChannel(accel_enable,0,euler_enable)
 
@@ -391,7 +397,7 @@ class Microstrain_Class(object):
 # Microstrain.recordDataToCSV(0,1)
 
 # 3. plot data into Figure, and save into a PNG image
-# Microstrain.plotDataCSV('data_2022-08-13 15:15:25.822028.csv')
+# Microstrain.plotDataCSV('Fri Jan 13 10:08:53 2023_imu_data.csv')
 
 # 4. parse packets of the data stream to update the
 # latest IMU data into Class properties
