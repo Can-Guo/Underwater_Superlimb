@@ -1,7 +1,7 @@
 '''
 Date: 2022-11-14 16:28:57
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-01-16 21:49:30
+LastEditTime: 2023-01-17 21:02:46
 FilePath: /script/Voice_Base.py
 '''
 
@@ -140,8 +140,8 @@ class Voice_Base(object):
         
         if formater == 'sample':
             # print("Raw Data Example:", data[0:50,1])
-            print("bits: ", bits)
-            print("SampleWidth:",self.pa.get_sample_size(pyaudio.paInt16))
+            # print("bits: ", bits)
+            # print("SampleWidth:",self.pa.get_sample_size(pyaudio.paInt16))
             data = data/(2**(bits-1))
         if return_nbits:
             return data, fs, bits 
@@ -683,11 +683,11 @@ class Voice_Base(object):
 
 ##############################
 # Test the Class Methods
-AU = Voice_Base(path='./wav_voice_1213/wav_single_pitch_1215/test_device_3_default_ID_15_6.wav')
+AU = Voice_Base(path='./Voice_WAV/voice_0117_wav/single_pitch/fa_1.wav')
 
 ####
 # # 功能 1: Record Audio
-AU.audiorecorder(len=10)
+# AU.audiorecorder(len=60)
 
 ####
 ## 功能 2: Read Audio File, into data in list
