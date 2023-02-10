@@ -1,7 +1,7 @@
 '''
 Date: 2022-11-14 16:28:57
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-01-17 21:02:46
+LastEditTime: 2023-02-09 22:42:30
 FilePath: /script/Voice_Base.py
 '''
 
@@ -10,7 +10,10 @@ import pandas as pd
 import wave 
 import pyaudio 
 from scipy.io import wavfile
-import matplotlib.pyplot as plt 
+import matplotlib 
+matplotlib.use('TkAgg') 
+
+import matplotlib.pyplot as plt
 import numpy as np 
 import noisereduce as nr
 
@@ -661,11 +664,11 @@ class Voice_Base(object):
 
         """
 
-        if voice_data == []:
+        if len(voice_data) == 0:
             print("Parameter Errors for Noice Reduction! Please Check your voice data!")
-        elif voice_data != [] and noise_data == []:
+        elif len(voice_data) != 0 and len(noise_data) == 0:
             reduced_voice_data = nr.reduce_noise(y=voice_data, sr=sample_rate)
-        elif voice_data != [] and noise_data != []:
+        elif len(voice_data) != 0 and len(noise_data) != 0:
             reduced_voice_data = nr.reduce_noise(y=voice_data, y_noise=noise_data, sr=sample_rate)
         else:
             print("Please check noise reduction parameters!\r\n")
@@ -683,11 +686,11 @@ class Voice_Base(object):
 
 ##############################
 # Test the Class Methods
-AU = Voice_Base(path='./Voice_WAV/voice_0117_wav/single_pitch/fa_1.wav')
+AU = Voice_Base(path='./Voice_WAV/voice_0117_wav/WZJ_single_pitch_0209/mi_1.wav')
 
 ####
 # # 功能 1: Record Audio
-# AU.audiorecorder(len=60)
+AU.audiorecorder(len=10)
 
 ####
 ## 功能 2: Read Audio File, into data in list
