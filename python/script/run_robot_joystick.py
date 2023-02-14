@@ -1,7 +1,7 @@
 '''
 Date: 2022-07-27 21:47:46
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2022-08-14 09:08:30
+LastEditTime: 2023-02-13 23:22:42
 FilePath: /script/run_robot_joystick.py
 '''
 
@@ -87,7 +87,7 @@ def T200_Servo_command(input_queue_1):
 
     # initial the control library of T200 Thruster
     T200_thruster = T200_Class()
-    T200_thruster.T200_power_scale = POWER[3]
+    T200_thruster.T200_power_scale = POWER[1]
     T200_thruster.send_T200_PWM_Width([1500, 1500])
     print("Initilize the T200 ...")
 
@@ -115,18 +115,18 @@ def T200_Servo_command(input_queue_1):
             servo_left_position = (int)(command.usrl_servo_command / 360.0 * 4096)
             servo_right_position = 4095 - servo_left_position
 
-        print("Left Servo Position: %d \t Right Servo Position: %d" % (servo_left_position,servo_right_position))
         Servo.sync_Write_Angle([servo_left_position,servo_right_position])
+        # print("Left Servo Position: %d \t Right Servo Position: %d" % (servo_left_position,servo_right_position))
 
         # print("Power Scale: %f", T200_thruster.T200_power_scale)
 
         if command.L_step <= -0.99 or command.R_step <= -0.99 :
             T200_thruster.send_T200_PWM_Width([1500,1500])
         else:
-            T200_PWM_Width = (int) (1500 + (command.L_step +  command.R_step + 2) * (400) * T200_thruster.T200_power_scale )
+            T200_PWM_Width = (int) (1500 + (command.R_step + 1) * (400) * T200_thruster.T200_power_scale )
 
             T200_thruster.send_T200_PWM_Width([T200_PWM_Width, T200_PWM_Width])
-        print("While is running and sending PWM!")
+            print("PWM %d,While is running and sending PWM!" % T200_PWM_Width)
 
 
 def main_process():
@@ -218,7 +218,7 @@ def main_process():
     # t4 = Thread(target=IMU_Data_Trans, args=(q2,))
 
 
-    t5 = Thread(target=IMU_Microstrain_Record_CSV)
+    # t5 = Thread(target=IMU_Microstrain_Record_CSV)
 
     # Multithread Executation
 

@@ -1,7 +1,7 @@
 '''
 Date: 2022-07-27 21:48:46
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2022-08-14 10:31:22
+LastEditTime: 2023-02-13 23:14:52
 FilePath: /script/T200_Truster.py
 '''
 
@@ -46,7 +46,8 @@ class T200_Class:
         # initialize the T200 via PWM control
         self.initialize_T200_PWM()
         # waiting for the T200 Thruster to settle and initialization of the POWER
-        time.sleep(3)
+        time.sleep(10)
+        print("Initialize T200 is done!")
     
 
     def sudo_command(self, password, command):
@@ -84,12 +85,12 @@ class T200_Class:
 
 #####################
 # Test of the T200_Class 
-T200 = T200_Class()
-T200.send_T200_PWM_Width([1250,1250])
+# T200 = T200_Class()
+# T200.send_T200_PWM_Width([1430,1430])
 
 
-time.sleep(10)
-T200.send_T200_PWM_Width([1500,1500])
+# time.sleep(5)
+# T200.send_T200_PWM_Width([1500,1500])
 
 #####################
 

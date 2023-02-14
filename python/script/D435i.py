@@ -1,8 +1,8 @@
 '''
 Date: 2022-07-27 22:43:23
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2022-08-13 17:08:21
-FilePath: /python/script/D435i.py
+LastEditTime: 2022-11-04 15:45:36
+FilePath: /script/D435i.py
 '''
 
 import pyrealsense2.pyrealsense2 as rs
@@ -179,18 +179,18 @@ class D435i_Class(object):
 
 ########################################################
 
-D435i = D435i_Class()
-D435i.start_stream()
-# D435i.get_pipeline_frame()
-
+# D435i = D435i_Class()
 # D435i.start_stream()
-global last_ts_gyro;last_ts_gyro = 0.0
-global accel_angle_x;accel_angle_x = 0
-global accel_angle_y;accel_angle_y = 0
-global accel_angle_z;accel_angle_z = 0
+# # D435i.get_pipeline_frame()
 
-while True:
-    D435i.get_IMU_update_Pose()
+# # D435i.start_stream()
+# global last_ts_gyro;last_ts_gyro = 0.0
+# global accel_angle_x;accel_angle_x = 0
+# global accel_angle_y;accel_angle_y = 0
+# global accel_angle_z;accel_angle_z = 0
+
+# while True:
+#     D435i.get_IMU_update_Pose()
 
 ########################################################
 

@@ -1,7 +1,7 @@
 '''
 Date: 2022-07-27 21:48:16
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-01-13 10:45:22
+LastEditTime: 2023-02-13 23:02:49
 FilePath: /script/IMU_Microstrain.py
 '''
 
@@ -385,8 +385,8 @@ class Microstrain_Class(object):
 
 
 ################################################
-Microstrain = Microstrain_Class(SampleRate=100)
-Microstrain.setToIdle()
+# Microstrain = Microstrain_Class(SampleRate=100)
+# Microstrain.setToIdle()
 # accel_enable = True; euler_enable = True
 # Microstrain.configIMUChannel(accel_enable,0,euler_enable)
 
