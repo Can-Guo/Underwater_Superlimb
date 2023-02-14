@@ -1,7 +1,7 @@
 /*
  * @Date: 2023-01-12 11:33:13
  * @LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
- * @LastEditTime: 2023-01-12 22:42:40
+ * @LastEditTime: 2023-02-15 04:25:18
  * @FilePath: /script/cpp/Microstrain_IMU_cpp.h
  */
 
@@ -14,6 +14,10 @@
 #include <chrono>
 #include <filesystem>
 
+// for time stamp generation
+#include<ctime>
+#include<sstream>
+// #include <iostream>
 
 #include "rapidcsv.h"
 #include <cmath>
@@ -113,6 +117,7 @@ public:
     vector <AHRS_IMU::ACCELERATION_EULER_ANGLE> parseDataStream_AHRS_IMU(int Timeout_ms, int PacketNumber);
 
     //Method or feature for data recording
+    string GetCurrentTimeStamp();
     string createCSV();
     string recordDataToCSV(vector <AHRS_IMU::ACCELERATION_EULER_ANGLE> acceleration_euler_angle);
 
@@ -411,6 +416,29 @@ vector <AHRS_IMU::ACCELERATION_EULER_ANGLE>  AHRS_IMU::parseDataStream_AHRS_IMU(
 }
 
 
+string AHRS_IMU::GetCurrentTimeStamp()
+{
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    std::time_t now_time_t = std::chrono::system_clock::to_time_t(now);
+    std::tm* now_tm = std::localtime(&now_time_t);
+
+    char buffer[40];
+    strftime(buffer, sizeof(buffer), "%F %T", now_tm);
+
+    std::ostringstream ss;
+    ss.fill('0');
+
+    std::chrono::milliseconds ms;
+
+    ms = std::chrono::duration_cast<std::chrono::milliseconds> (now.time_since_epoch()) % 1000;
+    ss << buffer << ":" << ms.count(); 
+    string timestamp = ss.str();
+
+    return string(timestamp);
+    
+}
+
+
 string AHRS_IMU::createCSV()
 {
     /*
@@ -422,16 +450,20 @@ string AHRS_IMU::createCSV()
     * 
     */
 
-    auto now = chrono::system_clock::now();
-    time_t tt;
-    tt = chrono::system_clock::to_time_t (now);
-    ostringstream oss;
-    oss << ctime(&tt);
-    string time = oss.str(); 
+    // auto now = chrono::system_clock::now();
+    // time_t tt;
+    // tt = chrono::system_clock::to_time_t (now);
+    // ostringstream oss;
+    // oss << ctime(&tt);
+    // string time = oss.str(); 
+
+
+    // using GetCurrentTimeStamp() Method to access timestamp
+    string time = AHRS_IMU::GetCurrentTimeStamp();
 
     // access the path to meet your personal system path.
     fs::path path_object = fs::current_path();
-    string filename = string(path_object.parent_path()) + "/csv_imu/" + string(time.erase(time.size()-1)) + "_imu_data.csv";
+    string filename = string(path_object.parent_path().parent_path()) + "/csv_imu_0214/" + string(time.erase(time.size()-1)) + "_imu_data.csv";
     
     std::cout << "Filename:\t" << filename << std::endl;
     ofstream fout(filename.c_str());

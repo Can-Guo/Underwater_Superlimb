@@ -1,7 +1,7 @@
 /*
  * @Date: 2023-01-12 11:45:16
  * @LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
- * @LastEditTime: 2023-01-13 10:43:44
+ * @LastEditTime: 2023-02-15 05:11:26
  * @FilePath: /script/cpp/IMU_Record_cpp.cpp
  */
 
@@ -34,9 +34,11 @@ namespace plt = matplotlibcpp;
 #include "rapidcsv.h"
 
  // namespace declaration
-namespace fs = std::filesystem ;
+namespace fs = std::filesystem;
 using namespace std;
 
+// define pai for computation
+#define Pai 3.1415926535
 
 // Method 1: GET CURRENT TIMESTAMP for data collection
 
@@ -61,6 +63,7 @@ std::string GetCurrentTimeStamp()
     return string(timestamp);
     
 }
+
 
 // Method 2: Plot the imu data, record the data into CSV file at the same time
 
@@ -95,13 +98,13 @@ void Plot_Record_IMU_realtime(AHRS_IMU imu_class, string csv_file_name, bool plo
     
         // plot the imu data in one frame
 
-        accel_x.push_back(accel_euler.Acceleration.accel_x);
-        accel_y.push_back(accel_euler.Acceleration.accel_y);
-        accel_z.push_back(accel_euler.Acceleration.accel_z);
+        accel_x.push_back(accel_euler.Acceleration.accel_x/Pai*180.0);
+        accel_y.push_back(accel_euler.Acceleration.accel_y/Pai*180.0);
+        accel_z.push_back(accel_euler.Acceleration.accel_z/Pai*180.0);
 
-        roll.push_back(accel_euler.Euler_Angle.roll);
-        pitch.push_back(accel_euler.Euler_Angle.pitch);
-        yaw.push_back(accel_euler.Euler_Angle.yaw);
+        roll.push_back(accel_euler.Euler_Angle.roll/Pai*180.0);
+        pitch.push_back(accel_euler.Euler_Angle.pitch/Pai*180.0);
+        yaw.push_back(accel_euler.Euler_Angle.yaw/Pai*180.0);
 
 
         if(plot_enable==true)
@@ -134,12 +137,12 @@ void Plot_Record_IMU_realtime(AHRS_IMU imu_class, string csv_file_name, bool plo
         if(imu_class.DataLabelName[0] == "Acceleration_x")
         {
             fout  << timestamp << ","
-                    << accel_euler.Acceleration.accel_x << "," 
-                    << accel_euler.Acceleration.accel_y << ","
-                    << accel_euler.Acceleration.accel_z << ","
-                    << accel_euler.Euler_Angle.roll << ","
-                    << accel_euler.Euler_Angle.pitch << ","
-                    << accel_euler.Euler_Angle.yaw << endl;
+                    << (accel_euler.Acceleration.accel_x)*9.8 << "," 
+                    << (accel_euler.Acceleration.accel_y)*9.8 << ","
+                    << (accel_euler.Acceleration.accel_z)*9.8 << ","
+                    << (accel_euler.Euler_Angle.roll)/Pai*180.0 << ","
+                    << (accel_euler.Euler_Angle.pitch)/Pai*180.0 << ","
+                    << (accel_euler.Euler_Angle.yaw)/Pai*180.0 << endl;
         }
 
         // if: Acceleration Data Stream is after the Euler Angle Data Stream
@@ -147,12 +150,12 @@ void Plot_Record_IMU_realtime(AHRS_IMU imu_class, string csv_file_name, bool plo
         else if (imu_class.DataLabelName[0] == "roll")
         {
             fout  << timestamp << ","
-                    << accel_euler.Euler_Angle.roll << ","
-                    << accel_euler.Euler_Angle.pitch << ","
-                    << accel_euler.Euler_Angle.yaw << ","
-                    << accel_euler.Acceleration.accel_x << "," 
-                    << accel_euler.Acceleration.accel_y << ","
-                    << accel_euler.Acceleration.accel_z << endl;
+                    << (accel_euler.Euler_Angle.roll)/Pai*180.0 << ","
+                    << (accel_euler.Euler_Angle.pitch)/Pai*180.0 << ","
+                    << (accel_euler.Euler_Angle.yaw)/Pai*180.0 << ","
+                    << (accel_euler.Acceleration.accel_x)*9.8 << "," 
+                    << (accel_euler.Acceleration.accel_y)*9.8 << ","
+                    << (accel_euler.Acceleration.accel_z)*9.8 << endl;
         }
     }
 }

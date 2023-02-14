@@ -1,16 +1,9 @@
 '''
 Date: 2022-08-27 22:00:19
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2022-09-01 21:50:48
-FilePath: \script\socket_imu_client.py
+LastEditTime: 2023-02-14 16:53:04
+FilePath: /script/socket_imu_client.py
 '''
-
-# '''
-# Date: 2022-08-27 16:18:18
-# LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-# LastEditTime: 2022-08-27 16:20:20
-# FilePath: \Underwater_Client\socket_imu_client.py
-# '''
 
 
 from Socket_IMU import IMUSocketClass 

@@ -19,6 +19,7 @@ set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
+set(PYTHON_INCLUDE_DIRS ${PYTHON_INCLUDE_DIRS} /home/guoyucan/.local/lib/python3.8/site-packages/numpy/core/include/)
 
 include_directories(/usr/share/c++-mscl/Boost/include/)
 include_directories(/usr/share/c++-mscl/source/)
