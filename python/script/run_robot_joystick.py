@@ -1,9 +1,19 @@
 '''
 Date: 2022-07-27 21:47:46
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-02-13 23:22:42
+LastEditTime: 2023-02-15 08:03:34
 FilePath: /script/run_robot_joystick.py
 '''
+
+
+from socket_imu_command import IMUCommandSocketClass 
+
+Socket_Command = IMUCommandSocketClass()
+
+msgfromClient = "Hello,UDP Server!".encode('utf-8')
+
+serverAddressPort = ("10.12.234.126", 54000)
+
 
 
 from Xbox import XBOX_Class 
@@ -23,67 +33,67 @@ import matplotlib.pyplot as plt
 
 
 # Thread 1: XBOX Joystick
-def XBOX_monitor(xbox_queue_1):
+# def XBOX_monitor(xbox_queue_1):
 
-    XBOX_device = XBOX_Class()
-    XBOX_device.initialize_xbox()
-    print("XBOX Initialization is Successful!")
-    time.sleep(3)
+#     XBOX_device = XBOX_Class()
+#     XBOX_device.initialize_xbox()
+#     print("XBOX Initialization is Successful!")
+#     time.sleep(3)
 
-    while True:
-        command = XBOX_device.get_xbox_status()
-        xbox_queue_1.put(command)
+#     while True:
+#         command = XBOX_device.get_xbox_status()
+#         xbox_queue_1.put(command)
 
-        if stop_threads == True:
-            break
+#         if stop_threads == True:
+#             break
 
 
 # Thread 2: Microstrain IMU Recording into CSV file
-def IMU_Microstrain_Record_CSV():
-    accel_enable = True
-    euler_enable = True
-    IMU_Microstrain = Microstrain_Class()#SampleRate=100)
-    IMU_Microstrain.configIMUChannel(accel_enable,0,euler_enable)
-    IMU_Microstrain.recordDataToCSV(accel_enable, euler_enable)
-    print("Recording IMU Data... Please Ctrl + C to terminate the recording.")
+# def IMU_Microstrain_Record_CSV():
+#     accel_enable = True
+#     euler_enable = True
+#     IMU_Microstrain = Microstrain_Class()#SampleRate=100)
+#     IMU_Microstrain.configIMUChannel(accel_enable,0,euler_enable)
+#     IMU_Microstrain.recordDataToCSV(accel_enable, euler_enable)
+#     print("Recording IMU Data... Please Ctrl + C to terminate the recording.")
 
 
 # Thread 3: Microstrain IMU Producer for Realtime Plotting and Update
-def IMU_Microstrain_producer(output_queue):
+# def IMU_Microstrain_producer(output_queue):
     
-    if Accel_enable == True and Euler_enable == True:
-        imu_list = np.zeros([100,6])
-    elif Accel_enable == False and Euler_enable == True:
-        imu_list = np.zeros([100,3])
+#     if Accel_enable == True and Euler_enable == True:
+#         imu_list = np.zeros([100,6])
+#     elif Accel_enable == False and Euler_enable == True:
+#         imu_list = np.zeros([100,3])
     
-    # initialize the IMU class and config the IMU Channel
-    IMU_Microstrain = Microstrain_Class(SampleRate=100)
-    IMU_Microstrain.configIMUChannel(Accel_enable,0,Euler_enable)
+#     # initialize the IMU class and config the IMU Channel
+#     IMU_Microstrain = Microstrain_Class(SampleRate=100)
+#     IMU_Microstrain.configIMUChannel(Accel_enable,0,Euler_enable)
 
-    while True:
-        imu_data_update = IMU_Microstrain.parseDataStream_Number(200,1,Accel_enable, Euler_enable)
+#     while True:
+#         imu_data_update = IMU_Microstrain.parseDataStream_Number(200,1,Accel_enable, Euler_enable)
 
-        imu_list[:-1] = imu_list[1:]
-        imu_list[-1] = imu_data_update
+#         imu_list[:-1] = imu_list[1:]
+#         imu_list[-1] = imu_data_update
 
-        output_queue.put(imu_list)
-        if stop_threads == True:
-            exit
+#         output_queue.put(imu_list)
+#         if stop_threads == True:
+#             exit
 
     # return imu_list
         
 # Thread 4:  IMU Data Transmission Thread
 
-def IMU_Data_Trans(input_queue):
+# def IMU_Data_Trans(input_queue):
     
-    imu_queue = input_queue.get()
+#     imu_queue = input_queue.get()
 
-    return imu_queue
+#     return imu_queue
 
 
 # Thread 5: T200 and Servo Control based on the XBOX Joystick Control Command 
 
-def T200_Servo_command(input_queue_1):
+def T200_Servo_command():
 
     # initial the control library of T200 Thruster
     T200_thruster = T200_Class()
@@ -102,41 +112,88 @@ def T200_Servo_command(input_queue_1):
     print("Initialize the T200 and Servo is Successful!")
 
 
+    # 1. create socekt and send a hint to client
+    Socket_Command.UDPClientSocket.sendto(msgfromClient, serverAddressPort)
+
+    
+
+    # print("IP:{}".format(msgfromServer[1]))
+
+    # print("IMU command %s", msgfromServer[0])
+
+    
+
+
+
     while True:
 
-        command = input_queue_1.get()
+        msgfromServer = Socket_Command.UDPClientSocket.recvfrom(1024)
+        imu_command = msgfromServer[0].decode('utf-8')
 
-        print("Angle:", command.usrl_servo_command)
+        command = imu_command
 
-        if 180.0 <= command.usrl_servo_command < 360.0:
-            servo_left_position = (int)(command.usrl_servo_command / 360.0 * 4096)
-            servo_right_position = 4095 - servo_left_position
-        elif 0.0 <= command.usrl_servo_command < 180.0:
-            servo_left_position = (int)(command.usrl_servo_command / 360.0 * 4096)
-            servo_right_position = 4095 - servo_left_position
-
-        Servo.sync_Write_Angle([servo_left_position,servo_right_position])
-        # print("Left Servo Position: %d \t Right Servo Position: %d" % (servo_left_position,servo_right_position))
-
-        # print("Power Scale: %f", T200_thruster.T200_power_scale)
-
-        if command.L_step <= -0.99 or command.R_step <= -0.99 :
+        # print("Angle:", command.usrl_servo_command)
+        if command=='0':
+            Servo.sync_Write_Angle([2048,2048])
             T200_thruster.send_T200_PWM_Width([1500,1500])
-        else:
-            T200_PWM_Width = (int) (1500 + (command.R_step + 1) * (400) * T200_thruster.T200_power_scale )
 
-            T200_thruster.send_T200_PWM_Width([T200_PWM_Width, T200_PWM_Width])
-            print("PWM %d,While is running and sending PWM!" % T200_PWM_Width)
+        elif command == '1':
+            left_angle = 1024
+        
+        elif command == '2':
+            left_angle = 0
+
+        elif command == '4':
+            left_angle = 3072
+
+        elif command == '5':
+            thrust = thrust - 10
+
+        elif command == '6':
+            thrust = thrust + 10
+
+        elif command == '3':
+            thrust = 1500
+        
+        right_angle = 4095 - left_angle
+
+        Servo.sync_Write_Angle([left_angle,right_angle])
+        if thrust > 1600:
+            thrust = 1600
+        elif thrust < 1400:
+            thrust = 1400
+            
+        T200_thruster.send_T200_PWM_Width([thrust,thrust])
+
+        # if 180.0 <= command.usrl_servo_command < 360.0:
+        #     servo_left_position = (int)(command.usrl_servo_command / 360.0 * 4096)
+        #     servo_right_position = 4095 - servo_left_position
+        # elif 0.0 <= command.usrl_servo_command < 180.0:
+        #     servo_left_position = (int)(command.usrl_servo_command / 360.0 * 4096)
+        #     servo_right_position = 4095 - servo_left_position
+
+        # Servo.sync_Write_Angle([servo_left_position,servo_right_position])
+        # # print("Left Servo Position: %d \t Right Servo Position: %d" % (servo_left_position,servo_right_position))
+
+        # # print("Power Scale: %f", T200_thruster.T200_power_scale)
+
+        # if command.L_step <= -0.99 or command.R_step <= -0.99 :
+        #     T200_thruster.send_T200_PWM_Width([1500,1500])
+        # else:
+        #     T200_PWM_Width = (int) (1500 + (command.R_step + 1) * (400) * T200_thruster.T200_power_scale )
+
+        #     T200_thruster.send_T200_PWM_Width([T200_PWM_Width, T200_PWM_Width])
+        #     print("PWM %d,While is running and sending PWM!" % T200_PWM_Width)
 
 
 def main_process():
 
     # TODO: initialize the IMU data from Microstrain IMU 
     # initialize the IMU data
-    global q_lines; q_lines = []
+    # global q_lines; q_lines = []
 
-    global Accel_enable;Accel_enable = False
-    global Euler_enable;Euler_enable = True
+    # global Accel_enable;Accel_enable = False
+    # global Euler_enable;Euler_enable = True
     
     # global imu_list 
     
@@ -202,15 +259,15 @@ def main_process():
     #     fig.tight_layout()
     #     plt.draw()  
 
-    global stop_threads
-    stop_threads = False
+    # global stop_threads
+    # stop_threads = False
 
-    # Multithread Definition
+    # # Multithread Definition
 
-    # Create FIFO Queue for multi-threading
-    q1 = Queue()
-    t1 = Thread(target = XBOX_monitor, args = (q1,))
-    t2 = Thread(target = T200_Servo_command, args = (q1, ))
+    # # Create FIFO Queue for multi-threading
+    # q1 = Queue()
+    t1 = Thread(target = T200_Servo_command)
+    # t2 = Thread(target = T200_Servo_command, args = (q1, ))
 
 
     # q2 = Queue()
@@ -223,8 +280,8 @@ def main_process():
     # Multithread Executation
 
     t1.start()
-    t2.start() 
-    
+    # t2.start() 
+    # 
     # t3.start()
     # t4.start()
 
