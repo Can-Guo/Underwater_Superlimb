@@ -1,7 +1,7 @@
 '''
 Date: 2023-02-14 16:52:34
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-02-15 06:17:10
+LastEditTime: 2023-02-15 07:29:46
 FilePath: /script/IMU_Recognition.py
 '''
 
@@ -73,6 +73,7 @@ def createCommandCSV(file_name):
 
 
 def IMU_recognition(csv_imu_file, csv_command_file):
+    global Socket_Command
 
     time.sleep(5)
 
@@ -106,6 +107,8 @@ def IMU_recognition(csv_imu_file, csv_command_file):
 
     timestamp_frame_one = Data_List_one[:,0]
 
+    Data = Socket_Command.UDPServerSocket.recvfrom(1024)
+
     if len(last_frame_number) == 1:
 
         if Data_List_one.shape[1] >= 4:
@@ -127,13 +130,24 @@ def IMU_recognition(csv_imu_file, csv_command_file):
                 writer.writerow({'Timestamp_cmd':timestamp_frame_one[i],'imu_cmd':current_mode})
             
             file.close()
+                    # last_frame_number.append(len(timestamp_frame))
+
+            print("Last Frame Number",last_frame_number)
+
+            # Socekt Message Sending
+            Send_string = current_mode
+            Send_String = Send_string.encode('utf-8')
+
+            Socket_Command.UDPServerSocket.sendto(Send_String, Data[1])
+
+            print("send for Once!\r\n")
+    
+    
         
         print("Please Wait until IMU data is more than 1000 frame!\r\n")
         
         
-        # last_frame_number.append(len(timestamp_frame))
-        print("Last Frame Number",last_frame_number)
-            
+           
 
     while(True):
 
@@ -194,6 +208,7 @@ def IMU_recognition(csv_imu_file, csv_command_file):
                 Send_String = Send_string.encode('utf-8')
 
                 Socket_Command.UDPServerSocket.sendto(Send_String, Data[1])
+                print("send is success!\r\n")
                 
         # elif 
             # sys.exit()
@@ -242,10 +257,10 @@ def take_str_name(flag):
 
 if __name__ == '__main__':
     
-    # file_name = take_str_name(flag=1)
-    # print(file_name)
-    # command_file = createCommandCSV(file_name)
-    # IMU_recognition(csv_command_file=command_file, csv_imu_file=file_name)
+    file_name = take_str_name(flag=1)
+    print(file_name)
+    command_file = createCommandCSV(file_name)
+    IMU_recognition(csv_command_file=command_file, csv_imu_file=file_name)
 
     ## Test the results
     file_name = take_str_name(flag=2)

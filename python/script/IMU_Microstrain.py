@@ -1,7 +1,7 @@
 '''
 Date: 2022-07-27 21:48:16
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-02-15 06:36:06
+LastEditTime: 2023-02-15 09:01:52
 FilePath: /script/IMU_Microstrain.py
 '''
 
@@ -29,6 +29,7 @@ import matplotlib.pyplot as plt
 import scienceplots 
 plt.style.use(['science','no-latex'])
 # import the mscl library
+import matplotlib.ticker as mtick
 
 import sys
 
@@ -178,6 +179,11 @@ class Microstrain_Class(object):
         csv_file = str(cwd) + '/csv_imu_0214/' + csv_file
         data_frame = pd.read_csv(csv_file)
 
+        csv_command_file = str(cwd) + '/csv_command/' + CSV_file_name
+        Command_frame = pd.read_csv(csv_command_file)
+
+        Command_value = (np.array(Command_frame))[:,1]
+
         frame_number = len(data_frame['Acceleration_x'])
         print("frame number:", frame_number)
         time_sequence = np.linspace(0, frame_number/self.SampleRate, frame_number)
@@ -227,7 +233,7 @@ class Microstrain_Class(object):
             # with plt.style.context(['science','no-latex']):
             plt.figure(figsize=(20,10))
 
-            ax1 = plt.subplot(2,1,1)
+            ax1 = plt.subplot(3,1,1)
 
             plt.plot(time_sequence, accel_x_record, 'r--', label = 'acceleration_x')
             plt.plot(time_sequence, accel_y_record, 'g-.', label = 'acceleration_y')
@@ -242,16 +248,25 @@ class Microstrain_Class(object):
             plt.yticks(fontsize = 10)
 
             plt.ylabel('Acceleration(m/s^2)', fontsize = 15)
-            plt.xlabel('Time(second)', fontsize = 15)
+            # plt.xlabel('Time(second)', fontsize = 15)
 
             plt.legend(fontsize = 15)
             # plt.grid()
 
-            ax2 = plt.subplot(2,1,2)
+            ax2 = plt.subplot(3,1,2)
+
+            # ax3 = ax2.twinx()
 
             plt.plot(time_sequence, roll_record, 'r--', label = 'roll angle')
             plt.plot(time_sequence, pitch_record, 'g-.', label = 'pitch angle')
             plt.plot(time_sequence, yaw_record, 'b-', label = 'yaw angle')
+
+            # ax3.plot(time_sequence, Command_value, 'c-.', label = 'command_index')
+            
+            # fmt = '%1d'
+            # yticks=mtick.FormatStrFormatter(fmt)
+            # ax2.yaxis.set_major_formatter(yticks)
+            # ax3.set_ylim(0,6)
 
             ax2.set_title("Euler Angles")
 
@@ -262,10 +277,21 @@ class Microstrain_Class(object):
             plt.yticks(fontsize = 10)
 
             plt.ylabel('Angle(degree)', fontsize = 15)
-            plt.xlabel('Time(second)', fontsize = 15)
+            
 
             ax2.legend(fontsize = 15)
             # plt.grid()
+
+            ax3 = plt.subplot(3,1,3)
+            plt.plot(time_sequence, Command_value, 'c-', label = 'command_index')
+            ax3.set_title("command index")
+            plt.xlim(time_sequence[0],time_sequence[frame_number-1])
+            plt.ylabel("Command Index", fontsize=15)
+            plt.xlabel('Time(second)', fontsize = 15)
+            plt.legend(fontsize=15)
+
+
+
 
         # current = datetime.now()
         cwd = os.path.abspath('.')
@@ -386,7 +412,7 @@ class Microstrain_Class(object):
 
 ################################################
 Microstrain = Microstrain_Class(SampleRate=100)
-Microstrain.setToIdle()
+# Microstrain.setToIdle()
 # accel_enable = True; euler_enable = True
 # Microstrain.configIMUChannel(accel_enable,0,euler_enable)
 
@@ -397,7 +423,7 @@ Microstrain.setToIdle()
 # Microstrain.recordDataToCSV(0,1)
 
 # 3. plot data into Figure, and save into a PNG image
-# Microstrain.plotDataCSV('2023-02-15 05:40:54:35_imu_data.csv')
+Microstrain.plotDataCSV('2023-02-15 05:40:54:35_imu_data.csv')
 
 # 4. parse packets of the data stream to update the
 # latest IMU data into Class properties

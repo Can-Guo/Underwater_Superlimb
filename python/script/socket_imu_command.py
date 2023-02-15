@@ -1,7 +1,7 @@
 '''
 Date: 2023-02-15 05:55:35
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-02-15 06:44:40
+LastEditTime: 2023-02-15 07:17:21
 FilePath: /script/socket_imu_command.py
 '''
 
@@ -14,7 +14,8 @@ import socket
 
 class IMUCommandSocketClass(object):
 
-    def __init__(self, local_ip="169.254.10.50", local_port=54000, server_or=1):
+    def __init__(self, local_ip="10.12.234.126", local_port=54000, server_or=1):
+        
         self.serverAddressPort = (local_ip, local_port)
 
         try:
