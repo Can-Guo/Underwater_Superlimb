@@ -1,14 +1,29 @@
 '''
 Date: 2023-02-14 16:52:34
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-02-15 07:29:46
+LastEditTime: 2023-02-17 00:44:00
 FilePath: /script/IMU_Recognition.py
 '''
 
-## socket
-from socket_imu_command import IMUCommandSocketClass 
+## socket UDP : Mi-notebook ==>  RaspberryPi 4B
+# from socket_imu_command import IMUCommandSocketClass 
+import socket as Socket
 
-Socket_Command = IMUCommandSocketClass()
+s= Socket.socket(Socket.AF_INET, Socket.SOCK_STREAM)
+s.bind(("10.12.234.126",54000))
+s.listen(10)
+client_socket,clienttAddr=s.accept()
+
+## socket TCP : PC ==> Mi-notebook
+import socket as Socket
+socket_Mi = Socket.socket(Socket.AF_INET, Socket.SOCK_STREAM)
+socket_Mi.settimeout(5000)
+socket_Mi.connect(("10.13.228.137", 7788))
+
+# msgFromClientTo_Mi = "Hello, Microphone!".encode('utf-8')
+# serverAddressPort = ("10.12.234.126", 7788)
+# Socket_mi_client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+# Socket_mi_client.sendto(msgFromClientTo_Mi, serverAddressPort)
 
 ## import libs
 import time
@@ -71,9 +86,19 @@ def createCommandCSV(file_name):
     
     return file_name
 
+## Encode IMU and Throat Microphone Message/ Token into string Message to be send
+def encodeIMU_MI(Data_IMU, Data_Mi):
+    send_string = str('')
+    send_string = str(Data_IMU) + ',' + str(Data_Mi)
+
+    print("Encoded Data: %s" % send_string)
+
+    return send_string
+
 
 def IMU_recognition(csv_imu_file, csv_command_file):
-    global Socket_Command
+    #global Socket_Command
+    global socket_Mi
 
     time.sleep(5)
 
@@ -89,8 +114,8 @@ def IMU_recognition(csv_imu_file, csv_command_file):
            
     IMU_Command_Label = ['0','1','2','3','4','5','6']
     current_mode = IMU_Command_Label[0]
+    # last_mode = str('0')
 
-    # last_frame_number.append(1000)
 
     X_threshold = 20.0 #/180.0 * np.pi 
     Y_threshold = 20.0 #/180.0 * np.pi 
@@ -107,7 +132,14 @@ def IMU_recognition(csv_imu_file, csv_command_file):
 
     timestamp_frame_one = Data_List_one[:,0]
 
-    Data = Socket_Command.UDPServerSocket.recvfrom(1024)
+    #Client_Data = Socket_Command.UDPServerSocket.recvfrom(1024)
+    print("Client Continue")
+
+    try:
+        Data_Mi = socket_Mi.recv(1024, 0x40)
+    except BlockingIOError as e:
+        print("Error!",e)
+    
 
     if len(last_frame_number) == 1:
 
@@ -132,26 +164,25 @@ def IMU_recognition(csv_imu_file, csv_command_file):
             file.close()
                     # last_frame_number.append(len(timestamp_frame))
 
-            print("Last Frame Number",last_frame_number)
+        print("Last Frame Number",last_frame_number)
 
             # Socekt Message Sending
-            Send_string = current_mode
-            Send_String = Send_string.encode('utf-8')
+            # Send_string = encodeIMU_MI(current_mode, (Data_Mi.decode('utf-8')))
+            # print("SEND STRING: %s" % Send_string)
 
-            Socket_Command.UDPServerSocket.sendto(Send_String, Data[1])
+        # Socekt Message Sending
+        # Send_String = current_mode.encode('utf-8')
+        Send_string = encodeIMU_MI(current_mode, (Data_Mi.decode('utf-8')))
+        client_socket.send(Send_string.encode('utf-8'))
 
-            print("send for Once!\r\n")
-    
-    
+        print("send for Once!\r\n") 
+
+        print("Please Wait until the IMU data is stable !\r\n")
         
-        print("Please Wait until IMU data is more than 1000 frame!\r\n")
-        
-        
-           
 
     while(True):
 
-        time.sleep(0.1)
+        time.sleep(0.25)
         
         IMU_data_frame = readIMUCSV(csv_imu_file,1)
 
@@ -161,7 +192,17 @@ def IMU_recognition(csv_imu_file, csv_command_file):
 
         timestamp_frame = Data_List[:,0]
 
-        Data = Socket_Command.UDPServerSocket.recvfrom(1024)
+        #Client_Data = client_socket.UDPServerSocket.recvfrom(1024)
+        
+        # if(Client_Data[0].decode('utf-8')=='so'):
+        #     print("So\r\n")
+        #     print("Quit! ")
+        #     sys.exit()
+
+        try:
+            Data_Mi = socket_Mi.recv(1024, 0x40)
+        except BlockingIOError as e:
+            print("Error!",e)
     
 
         if len(last_frame_number) >= 2 : 
@@ -173,47 +214,52 @@ def IMU_recognition(csv_imu_file, csv_command_file):
                     roll_record_new = Data_List[last_frame_number[-2]:last_frame_number[-1],4]
                     pitch_record_new = Data_List[last_frame_number[-2]:last_frame_number[-1],5]
                     yaw_record_new = Data_List[last_frame_number[-2]:last_frame_number[-1],6]
+
+                    # break
                 
                 if(((roll_record_new[i-last_frame_number[-2]] - roll_before) >= X_threshold) and (np.abs(pitch_record_new[i-last_frame_number[-2]] -pitch_before) <= Y_threshold)):
                     current_mode = IMU_Command_Label[3]
+                    # break
 
                 if((yaw_record_new[i-last_frame_number[-2]] - yaw_before) >= Z_threshold):
                     current_mode = IMU_Command_Label[6]
+                    # break
 
                 if((roll_record_new[i-last_frame_number[-2]] - roll_before) <= -X_threshold):
                     current_mode = IMU_Command_Label[4]
+                    # break
 
                 if((pitch_record_new[i-last_frame_number[-2]] - pitch_before) <= -Y_threshold):
                     current_mode = IMU_Command_Label[1]
+                    # break
 
                 if((yaw_record_new[i-last_frame_number[-2]] - yaw_before) <= -2*Z_threshold):
                     current_mode = IMU_Command_Label[5]
+                    # break
 
                 if((pitch_record_new[i-last_frame_number[-2]] - pitch_before) >= 1.5*Y_threshold):
                     current_mode = IMU_Command_Label[2]
+                    # break
 
                 if (( np.abs(yaw_record_new[i-last_frame_number[-2]] - yaw_before) <= np.abs(0.5*Z_threshold))
                     and (np.abs(pitch_record_new[i-last_frame_number[-2]] - pitch_before) <= np.abs(0.5*Y_threshold)) 
                     and (np.abs(roll_record_new[i-last_frame_number[-2]] - roll_before) <= np.abs(0.5*X_threshold))):
                     current_mode = IMU_Command_Label[0]
-
+                    pass 
+                    # break
+                
                 with open(csv_command_file, 'a') as file:
                     writer = csv.DictWriter(file, fieldnames=['Timestamp_cmd','imu_cmd']) #,'Throat_Mi'])
                     writer.writerow({'Timestamp_cmd':timestamp_frame[i],'imu_cmd':current_mode})
                 
-                file.close()
+                file.close()                
 
-                # Socekt Message Sending
-                Send_string = current_mode
-                Send_String = Send_string.encode('utf-8')
-
-                Socket_Command.UDPServerSocket.sendto(Send_String, Data[1])
-                print("send is success!\r\n")
-                
-        # elif 
-            # sys.exit()
-
-    # return None 
+            # Socekt Message Sending
+            Send_string = encodeIMU_MI(current_mode, (Data_Mi.decode('utf-8')))
+            # print("SEND STRING: %s" % Send_string)
+            client_socket.send(Send_string.encode('utf-8'))
+        
+    
 
 def plot_csv_cmd(csv_command_file):
 

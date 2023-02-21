@@ -1,8 +1,8 @@
 '''
 Date: 2022-09-01 16:54:03
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2022-09-01 21:48:11
-FilePath: \script\Socket_IMU.py
+LastEditTime: 2023-02-16 19:48:54
+FilePath: /script/Socket_IMU.py
 '''
 
 import socket
@@ -69,7 +69,7 @@ class IMUSocketClass(object):
         imu_data_decode = recv_string_gtk.split(',')
         
         return imu_data_decode
-
+    
 
     ## create a CSV file to save the IMU data
 
