@@ -1,7 +1,7 @@
 '''
 Date: 2022-07-27 21:47:55
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-02-13 22:34:54
+LastEditTime: 2023-02-17 01:26:28
 FilePath: /script/Xbox.py
 '''
 
@@ -159,143 +159,143 @@ class XBOX_Class(object):
         
     def get_xbox_status(self):
 
-        self.done = False
+        # self.done = False
 
-        if self.done == False:
+        # if self.done == False:
             ## TODO: need to integrate with the stepless abjustment of Power 
 
             ### HAHAHA ! Interesting ! 
 
 
-            clock = pygame.time.Clock()
+        clock = pygame.time.Clock()
+        
+        
+        # while self.done == False:
             
+        # self.initialize_xbox()
+        # EVENT PROCESSING STEP
+        # if pygame.event.get() == None:
+        
+        self.clear_xbox_status()
             
-            # while self.done == False:
+        for event in pygame.event.get(): # User did something
+            if event.type == pygame.QUIT: # If user clicked close
+                # self.done=True # Flag that we are done so we exit this loop
+                pygame.quit()
+                exit()
+        
+        # Get the status of the axes
+        for i in range( self.axes ):
+            axis = self.joystick.get_axis( i )
+            # print(self.axes)
+            if i == 0:
+                self.axis_0 = axis
+                # print("0:",self.axis_0)
+            if i == 1:
+                self.axis_1 = axis
+                # print("1:",self.axis_1)
+            if i == 2:
+                self.L_step = axis
+                # print("2:",self.L_step)
+            if i == 3:
+                self.axis_3 = axis
+                # print("3:",self.axis_3)
+            if i == 4:
+                # print(i)
+                self.axis_4 = axis
+                # print("4:",self.axis_4)
+                # print("R Step:",self.R_step)
+            if i == 5:
+                self.R_step = axis
+                # print("L Step  ",self.L_step)
+
+        # print("Stick 1  (%f,%f)  \n" % (self.axis_0, self.axis_1))
+        # print(" Left_Step  %f  \n" % self.L_step)
+        # print("Stick 2  (%f,%f)  \n" % (self.axis_3, self.axis_4))
+        # print("Right_Step  %f  \n" % self.R_step)
+
+
+        # Get the status of the buttons
+        for i in range( self.buttons ):
+            button = self.joystick.get_button( i )
+            # print(i,button)
+            if i == 0 and button == 1:
+                self.A = 1
+                self.B = 0
+                self.X = 0
+                self.Y = 0
+                print("A")
+
+            if i == 1 and button == 1:
+                self.A = 0
+                self.B = 1
+                self.X = 0
+                self.Y = 0
+                print("B")
+
+            if i == 2 and button == 1:
+                self.A = 0
+                self.B = 0
+                self.X = 1
+                self.Y = 0
+                print("X")
+
+            if i == 3 and button == 1:
+                self.A = 0
+                self.B = 0
+                self.X = 0
+                self.Y = 1
+                print("Y")
+
+            if i == 4 and button == 1:
+                self.LB = 1.0
+                print("LB")
+
+            if i == 5 and button == 1:
+                self.RB = 1.0
+                print("RB")
+
+            if i == 6 and button == 1:
+                self.Disonnect = 1.0
+                # self.done = True
+                # print("Stop Connection !")
+                # self.shutdown()
+
+            if i == 7 and button == 1:
+                self.Menu = 1
+                print("Menu")
+
+            if i == 8 and button == 1:
+                print("POWER Button!")
+                # print(i)
+
+            if i == 9 and button == 1:
+                self.LeftStickPress = 1
+                print("Left Stick Pressed")
+
+            if i == 10 and button == 1:
+                self.RightStickPress = 0
+                print("Right Stick Pressed")
                 
-            # self.initialize_xbox()
-            # EVENT PROCESSING STEP
-            # if pygame.event.get() == None:
-            
-            self.clear_xbox_status()
-                
-            for event in pygame.event.get(): # User did something
-                if event.type == pygame.QUIT: # If user clicked close
-                    # self.done=True # Flag that we are done so we exit this loop
-                    pygame.quit()
-                    exit()
-            
-            # Get the status of the axes
-            for i in range( self.axes ):
-                axis = self.joystick.get_axis( i )
-                # print(self.axes)
-                if i == 0:
-                    self.axis_0 = axis
-                    # print("0:",self.axis_0)
-                if i == 1:
-                    self.axis_1 = axis
-                    # print("1:",self.axis_1)
-                if i == 2:
-                    self.L_step = axis
-                    # print("2:",self.L_step)
-                if i == 3:
-                    self.axis_3 = axis
-                    # print("3:",self.axis_3)
-                if i == 4:
-                    # print(i)
-                    self.axis_4 = axis
-                    # print("4:",self.axis_4)
-                    # print("R Step:",self.R_step)
-                if i == 5:
-                    self.R_step = axis
-                    # print("L Step  ",self.L_step)
-
-            # print("Stick 1  (%f,%f)  \n" % (self.axis_0, self.axis_1))
-            # print(" Left_Step  %f  \n" % self.L_step)
-            # print("Stick 2  (%f,%f)  \n" % (self.axis_3, self.axis_4))
-            # print("Right_Step  %f  \n" % self.R_step)
 
 
-            # Get the status of the buttons
-            for i in range( self.buttons ):
-                button = self.joystick.get_button( i )
-                # print(i,button)
-                if i == 0 and button == 1:
-                    self.A = 1
-                    self.B = 0
-                    self.X = 0
-                    self.Y = 0
-                    print("A")
-
-                if i == 1 and button == 1:
-                    self.A = 0
-                    self.B = 1
-                    self.X = 0
-                    self.Y = 0
-                    print("B")
-
-                if i == 2 and button == 1:
-                    self.A = 0
-                    self.B = 0
-                    self.X = 1
-                    self.Y = 0
-                    print("X")
-
-                if i == 3 and button == 1:
-                    self.A = 0
-                    self.B = 0
-                    self.X = 0
-                    self.Y = 1
-                    print("Y")
-
-                if i == 4 and button == 1:
-                    self.LB = 1.0
-                    print("LB")
-
-                if i == 5 and button == 1:
-                    self.RB = 1.0
-                    print("RB")
-
-                if i == 6 and button == 1:
-                    self.Disonnect = 1.0
-                    # self.done = True
-                    # print("Stop Connection !")
-                    # self.shutdown()
-
-                if i == 7 and button == 1:
-                    self.Menu = 1
-                    print("Menu")
-
-                if i == 8 and button == 1:
-                    print("POWER Button!")
-                    # print(i)
-
-                if i == 9 and button == 1:
-                    self.LeftStickPress = 1
-                    print("Left Stick Pressed")
-
-                if i == 10 and button == 1:
-                    self.RightStickPress = 0
-                    print("Right Stick Pressed")
-                    
-
-
-            for i in range( self.hats ):
-                hat = self.joystick.get_hat( i )
-                # print(hat)
-                if hat == (1,0):
-                    self.FX_right = 1.0
-                    print("FX_right")
-                if hat == (-1,0):
-                    self.FX_left = 1.0
-                    print("FX_left")
-                if hat == (0,1):
-                    self.FX_up = 1.0
-                    print("FX_up")
-                if hat == (0,-1):
-                    self.FX_down = 1.0
-                    print("FX_down")
-                if hat == (0,0):
-                    self.FX_default = 1.0
+        for i in range( self.hats ):
+            hat = self.joystick.get_hat( i )
+            # print(hat)
+            if hat == (1,0):
+                self.FX_right = 1.0
+                print("FX_right")
+            if hat == (-1,0):
+                self.FX_left = 1.0
+                print("FX_left")
+            if hat == (0,1):
+                self.FX_up = 1.0
+                print("FX_up")
+            if hat == (0,-1):
+                self.FX_down = 1.0
+                print("FX_down")
+            if hat == (0,0):
+                self.FX_default = 1.0
             
             self.usrl_servo_command = self.usrl_servo_angle(self.axis_0, self.axis_1)
                     

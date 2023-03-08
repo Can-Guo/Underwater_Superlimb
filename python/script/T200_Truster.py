@@ -1,7 +1,7 @@
 '''
 Date: 2022-07-27 21:48:46
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-02-13 23:14:52
+LastEditTime: 2023-02-21 17:28:02
 FilePath: /script/T200_Truster.py
 '''
 
@@ -86,10 +86,10 @@ class T200_Class:
 #####################
 # Test of the T200_Class 
 # T200 = T200_Class()
-# T200.send_T200_PWM_Width([1430,1430])
+# T200.send_T200_PWM_Width([1550,1550])
 
 
-# time.sleep(5)
+# time.sleep(3)
 # T200.send_T200_PWM_Width([1500,1500])
 
 #####################

@@ -1,7 +1,7 @@
 '''
 Date: 2022-07-27 21:48:24
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-02-13 22:59:34
+LastEditTime: 2023-03-08 22:58:06
 FilePath: /script/Dynamixel.py
 '''
 
@@ -164,7 +164,7 @@ class Servo_Class(object):
 
         return 
 
-    
+        
     def sync_Read_Angle(self):
         
 
@@ -210,26 +210,30 @@ class Servo_Class(object):
         dxl_present_position = self.groupSyncRead.getData(self.DXL_ID_List[1], ADDR_PRESENT_POSITION, LEN_PRESENT_POSITION)
         self.dxl_ID_present_position[self.DXL_ID_List[1]] = dxl_present_position
 
-        print(self.dxl_ID_present_position)
-        self.groupSyncRead.clearParam()        
+        # print(self.dxl_ID_present_position)
+        self.groupSyncRead.clearParam()
+
 
 
 
 ############################################
 
 # PortName = '/dev/ttyUSB0'
-# Servo = Servo_Class(PortName, 57600)                             
+# Servo = Servo_Class(PortName, 57600)
+
 # Servo.enable_Torque()
-# time.sleep(2)
+# Servo.sync_Write_Angle([2048,2048])
 
-# # dxl_goal_position = [0,1024,2048,3072]
-# dxl_goal_position = [2048,2048]
-
-# Servo.sync_Write_Angle(dxl_goal_position)
-# print("Write Success!")
+# # time.sleep(2)
 
 # for i in range(50):
 #     Servo.sync_Read_Angle()
+#     print("Servo position",Servo.dxl_ID_present_position)
+
+# Servo.sync_Write_Angle([0,0])
+
+# # dxl_1,dxl_2,dxl_3 = Servo.packetHandler.read1ByteTxRx(Servo.portHandler,1,70)
+# # print("Error:",dxl_1,dxl_2,dxl_3)
 
 # time.sleep(2)
 # Servo.disable_Torque()
