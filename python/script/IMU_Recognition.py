@@ -1,7 +1,7 @@
 '''
 Date: 2023-02-14 16:52:34
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-02-17 00:44:00
+LastEditTime: 2023-03-08 20:48:43
 FilePath: /script/IMU_Recognition.py
 '''
 
@@ -139,7 +139,7 @@ def IMU_recognition(csv_imu_file, csv_command_file):
         Data_Mi = socket_Mi.recv(1024, 0x40)
     except BlockingIOError as e:
         print("Error!",e)
-    
+
 
     if len(last_frame_number) == 1:
 
