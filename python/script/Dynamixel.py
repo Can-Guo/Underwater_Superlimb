@@ -1,7 +1,7 @@
 '''
 Date: 2022-07-27 21:48:24
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-03-09 00:48:27
+LastEditTime: 2023-03-11 21:08:33
 FilePath: /script/Dynamixel.py
 '''
 
@@ -262,6 +262,7 @@ class Servo_Class(object):
 
         # print(self.dxl_ID_present_position)
         self.groupSyncRead.clearParam()
+        return [round(dxl_present_angle[0],3),round(dxl_present_angle[1],3)]
 
 
 
