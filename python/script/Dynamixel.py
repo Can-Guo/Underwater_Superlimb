@@ -1,11 +1,12 @@
 '''
 Date: 2022-07-27 21:48:24
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-03-08 22:58:06
+LastEditTime: 2023-03-09 00:48:27
 FilePath: /script/Dynamixel.py
 '''
 
-import os 
+import os
+from turtle import left 
 import numpy as np 
 
 if os.name == 'nt':
@@ -93,6 +94,8 @@ class Servo_Class(object):
         self.DXL_ID_State, dxl_comm_result = self.packetHandler.broadcastPing(self.portHandler)
         self.DXL_ID_List = list(self.DXL_ID_State.keys())
 
+        self.dxl_ID_present_Angle = {self.DXL_ID_List[0]:[],self.DXL_ID_List[1]:[]}
+
         # Try to broadcast ping the Dynamixel
         if dxl_comm_result != COMM_SUCCESS:
             print("%s" % self.packetHandler.getTxRxResult(dxl_comm_result))
@@ -141,9 +144,55 @@ class Servo_Class(object):
                 # print("Dynamixel #%d has been successfully connected" % dxl_id)
 
 
-    def sync_Write_Angle(self, dxl_goal_position):
+    def degree_position(self,degree_list):
+        if -180 <= degree_list[0] <= 180:
+            left_position = (int)((degree_list[0]*2047/180) + 2047)
+        # elif degree_list[0]==-180 and current_angle < 0:
+            # left_position = 
+        else:
+            print("Left Angle [%d] is not valid, please check your angle value!" % degree_list[0])
+            
+        if -180 <= degree_list[1] <= 180:
+            right_position = (int)((-degree_list[1]*2047/180) + 2047)
+        else:
+            print("Right Angle [%d] is not valid, please check your angle value!" % degree_list[1])
+        
+        if left_position >= 4095:
+            left_position=4095
+
+        if right_position >= 4095:
+            right_position=4095
+            
+        return [left_position,right_position]
+
+
+    def position_degree(self,position_list):
+        
+        if position_list[0] >= 4095:
+            position_list[0]=4095
+        if position_list[1] >= 4095:
+            position_list[1]=4095
+    
+        if 0 <= position_list[0] <= 4095:
+            left_angle = 180 * (position_list[0] - 2047) / 2047
+        else:
+            print("Left Position [%d] is invalid, please check your servo position!" % position_list[0])
+            return 
+
+        if 0 <= position_list[1] <= 4095:
+            right_angle = -180 * (position_list[1] - 2047) / 2047
+        else:
+            print("Left Position [%d] is invalid, please check your servo position!" % position_list[1])
+            return
+
+        # if 
+        return [left_angle,right_angle]
+
+
+    def sync_Write_Angle(self, dxl_goal_Angle):
 
         # index = 2
+        dxl_goal_position = self.degree_position(dxl_goal_Angle)
         
         # Allocate goal position value into byte array
         for dxl_id in self.DXL_ID_List:
@@ -167,7 +216,6 @@ class Servo_Class(object):
         
     def sync_Read_Angle(self):
         
-
         # Add parameter storage for Dynamixel#1 present position value
         for dxl_id in self.DXL_ID_List:
             dxl_addparam_result = self.groupSyncRead.addParam(dxl_id)
@@ -181,7 +229,7 @@ class Servo_Class(object):
             #     print("[ID:%03d] groupSyncRead addparam failed" % DXL2_ID)
             #     quit()
 
-        self.dxl_ID_present_position = {self.DXL_ID_List[0]:[],self.DXL_ID_List[1]:[]}
+        
 
         # Syncread present position
         dxl_comm_result = self.groupSyncRead.txRxPacket()
@@ -204,11 +252,13 @@ class Servo_Class(object):
             print("[ID:%03d] groupSyncRead getdata failed" % self.DXL_ID_List[1])
             quit()
 
-        dxl_present_position = self.groupSyncRead.getData(self.DXL_ID_List[0], ADDR_PRESENT_POSITION, LEN_PRESENT_POSITION)
-        self.dxl_ID_present_position[self.DXL_ID_List[0]] = dxl_present_position
+        dxl_present_position_1 = self.groupSyncRead.getData(self.DXL_ID_List[0], ADDR_PRESENT_POSITION, LEN_PRESENT_POSITION)
+        dxl_present_position_2 = self.groupSyncRead.getData(self.DXL_ID_List[1], ADDR_PRESENT_POSITION, LEN_PRESENT_POSITION)
 
-        dxl_present_position = self.groupSyncRead.getData(self.DXL_ID_List[1], ADDR_PRESENT_POSITION, LEN_PRESENT_POSITION)
-        self.dxl_ID_present_position[self.DXL_ID_List[1]] = dxl_present_position
+        dxl_present_angle = self.position_degree([dxl_present_position_1,dxl_present_position_2])
+
+        self.dxl_ID_present_Angle[self.DXL_ID_List[0]] = round(dxl_present_angle[0],3)
+        self.dxl_ID_present_Angle[self.DXL_ID_List[1]] = round(dxl_present_angle[1],3)
 
         # print(self.dxl_ID_present_position)
         self.groupSyncRead.clearParam()
@@ -222,18 +272,27 @@ class Servo_Class(object):
 # Servo = Servo_Class(PortName, 57600)
 
 # Servo.enable_Torque()
-# Servo.sync_Write_Angle([2048,2048])
+# Servo.sync_Write_Angle([-180,180])
 
 # # time.sleep(2)
-
 # for i in range(50):
 #     Servo.sync_Read_Angle()
-#     print("Servo position",Servo.dxl_ID_present_position)
+#     print("Servo Angle ID 1: %.3f \t ID 2: %.3f" % (Servo.dxl_ID_present_Angle[1],Servo.dxl_ID_present_Angle[1]))
+
+# time.sleep(2)
 
 # Servo.sync_Write_Angle([0,0])
 
-# # dxl_1,dxl_2,dxl_3 = Servo.packetHandler.read1ByteTxRx(Servo.portHandler,1,70)
-# # print("Error:",dxl_1,dxl_2,dxl_3)
+# time.sleep(2)
+
+# Servo.sync_Write_Angle([180,-180])
+
+# for i in range(50):
+#     Servo.sync_Read_Angle()
+#     print("Servo Angle ID 1: %.3f \t ID 2: %.3f" % (Servo.dxl_ID_present_Angle[1],Servo.dxl_ID_present_Angle[1]))
+
+# dxl_1,dxl_2,dxl_3 = Servo.packetHandler.read1ByteTxRx(Servo.portHandler,1,70)
+# print("Error:",dxl_1,dxl_2,dxl_3)
 
 # time.sleep(2)
 # Servo.disable_Torque()
