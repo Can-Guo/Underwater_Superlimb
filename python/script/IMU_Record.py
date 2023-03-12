@@ -1,7 +1,7 @@
 '''
 Date: 2023-01-11 21:55:26
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-01-12 00:19:58
+LastEditTime: 2023-03-09 23:29:53
 FilePath: /script/IMU_Record.py
 '''
 
@@ -61,11 +61,11 @@ q1= Queue()
 t1 = Thread(target = Access_IMU, args=(q1,))
 t2 = Thread(target=Return_IMU, args=(q1,))
 
-# t3 = Thread(target=Record_IMU)
+t3 = Thread(target=Record_IMU)
 
 t1.start()
 t2.start()
-# t3.start()
+t3.start()
 
 
 ## Main Thread for Matplotlig GUI 

@@ -1,29 +1,24 @@
 '''
 Date: 2023-02-14 16:52:34
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-03-08 20:48:43
+LastEditTime: 2023-03-10 21:31:45
 FilePath: /script/IMU_Recognition.py
 '''
 
-## socket UDP : Mi-notebook ==>  RaspberryPi 4B
-# from socket_imu_command import IMUCommandSocketClass 
+
 import socket as Socket
 
+## socket TCP : Ubuntu(server) <==> Raspberry Pi 4B
 s= Socket.socket(Socket.AF_INET, Socket.SOCK_STREAM)
 s.bind(("10.12.234.126",54000))
 s.listen(10)
 client_socket,clienttAddr=s.accept()
 
-## socket TCP : PC ==> Mi-notebook
+## socket TCP : Ubuntu(client) <==> Mi-notebook (server)
 import socket as Socket
 socket_Mi = Socket.socket(Socket.AF_INET, Socket.SOCK_STREAM)
 socket_Mi.settimeout(5000)
 socket_Mi.connect(("10.13.228.137", 7788))
-
-# msgFromClientTo_Mi = "Hello, Microphone!".encode('utf-8')
-# serverAddressPort = ("10.12.234.126", 7788)
-# Socket_mi_client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-# Socket_mi_client.sendto(msgFromClientTo_Mi, serverAddressPort)
 
 ## import libs
 import time
@@ -36,6 +31,7 @@ from datetime import datetime
 import matplotlib.pyplot as plt 
 import scienceplots 
 plt.style.use(['science','no-latex'])
+
 
 ## List to label the frame number
 last_frame_number =[]
@@ -52,9 +48,9 @@ def readIMUCSV(csv_file, flag):
     # CSV_file_name = csv_file
 
     if flag == 1:
-        csv_file = str(cwd) + '/csv_imu_0214/' + csv_file
+        csv_file = str(cwd) + '/csv_imu_0310/' + csv_file
     elif flag == 2:
-        csv_file = str(cwd) + '/csv_command/' + csv_file
+        csv_file = str(cwd) + '/csv_command_0310/' + csv_file
 
     data_frame = pd.read_csv(csv_file)
 
@@ -63,7 +59,7 @@ def readIMUCSV(csv_file, flag):
     elif flag == 2:
         frame_number = len(data_frame['Timestamp_cmd'])
 
-    global last_frame_number
+    # global last_frame_number
     # last_frame_number.append(frame_number)
 
     print("Frame Number: %d \r\n" % frame_number)
@@ -74,7 +70,7 @@ def readIMUCSV(csv_file, flag):
 def createCommandCSV(file_name):
     cwd = os.path.abspath('.')
     # time_mark = datetime.now()
-    file_name = str(cwd) + '/csv_command/' + file_name # + str(time_mark) + '.csv'
+    file_name = str(cwd) + '/csv_command_0310/' + file_name # + str(time_mark) + '.csv'
     # print("Name", file_name)
     
     with open(file_name, 'a') as file:
@@ -153,7 +149,7 @@ def IMU_recognition(csv_imu_file, csv_command_file):
             yaw_before = np.mean(yaw_record_before)
 
             print("Roll Before: %f, Pitch Before: %f, Yaw Before: %f" % (roll_before,pitch_before,yaw_before))
-            
+
 
         for i in range(last_frame_number[0]):#len(timestamp_frame[0])):
 
@@ -291,9 +287,9 @@ def plot_csv_cmd(csv_command_file):
 
 def take_str_name(flag):
     if flag == 1:
-        path = os.path.abspath('.') + str('/csv_imu_0214/')
+        path = os.path.abspath('.') + str('/csv_imu_0310/')
     elif flag == 2:
-        path = os.path.abspath('.') + str('/csv_command/')
+        path = os.path.abspath('.') + str('/csv_command_0310/')
         
     list = os.listdir(path=path)
     list.sort()
@@ -313,6 +309,7 @@ if __name__ == '__main__':
     print(file_name)
     plot_csv_cmd(file_name)
     
+
 
 else:
     print("Errors! Please check your codes.\r\n")
