@@ -1,7 +1,7 @@
 '''
 Date: 2023-03-12 22:27:05
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-03-13 01:03:09
+LastEditTime: 2023-03-13 15:01:27
 FilePath: /script/Plot_servo_thruster.py
 '''
 
@@ -113,7 +113,7 @@ def plot_servo_thrust_static(csv_file):
 
 
 if __name__ == '__main__':
-    csv_name = '2023-03-12 02:33:16.047920_exp_2_OK_2.csv'
+    csv_name = '2023-03-11 22:47:12.135232_exp_1_OK_1.csv'
     plot_servo_thrust_static(csv_name)
 
 

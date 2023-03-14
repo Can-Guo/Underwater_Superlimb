@@ -1,7 +1,7 @@
 '''
 Date: 2023-03-12 00:35:49
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-03-12 02:10:08
+LastEditTime: 2023-03-14 10:43:47
 FilePath: /script/run_robot_stepless_exp_2.py
 '''
 
@@ -140,25 +140,25 @@ def T200_Servo_command():
                     left_angle = (int)(K_2 * strength)
                     right_angle = (int)(left_angle)
 
-                if flag==1:
+                elif flag==1:
                     left_angle = (int)(K_1 * strength)
                     right_angle = (int)(left_angle)
 
-                if flag==6:
+                elif flag==6:
                     left_angle = (int)(K_6 *  strength)
                     right_angle = - (int)(left_angle)
 
-                if flag==5:
+                elif flag==5:
                     left_angle = (int)(K_5 * strength)
                     right_angle = - (int)(left_angle)
 
-                if flag==3:
+                elif flag==3:
                     left_thrust = 1500 + (int)(K_3 * strength)
                     right_thrust = left_thrust
                     left_angle = -90
                     right_angle= -90
 
-                if flag==4:
+                elif flag==4:
                     left_thrust = 1500 + (int)(K_4 * strength)
                     right_thrust = left_thrust
                     left_angle = -90
@@ -177,12 +177,14 @@ def T200_Servo_command():
                 #     right_angle= -90
             elif Decoded_mode_strength_first[1]=='Q':
                 flag = 0
+                print("Accept the Quit Command:Q!\r\n")
 
             if flag ==0:
                 left_angle =0
                 right_angle=0
                 left_thrust=1500
                 right_thrust=1500
+                print("Quit the System!\r\n")
 
             ## send command to servo and thruster
             
@@ -197,12 +199,13 @@ def T200_Servo_command():
                 right_thrust=1400
 
             print("Left_Angle:%d Right_Angle:%d Left_Thrust:%d Right_Thrust:%d" % (left_angle,right_angle,left_thrust,right_thrust))    
-            Servo.sync_Write_Angle([left_angle,right_angle])
             T200_thruster.send_T200_PWM_Width([left_thrust,right_thrust])
             
             current_time = datetime.now()
+            Servo.sync_Write_Angle([left_angle,right_angle])
+            # time.sleep(0.5)
             read_servo_angle_list = Servo.sync_Read_Angle()
-
+            
             with open(csv_log_file,'a') as file:
                 writer = csv.DictWriter(file, fieldnames=['Timestamp_log','left_angle','right_angle','left_thrust','right_thrust','read_left_angle','read_right_angle'])
                 writer.writerow({'Timestamp_log':current_time,'left_angle':left_angle,'right_angle':right_angle,'left_thrust':left_thrust,'right_thrust':right_thrust,'read_left_angle':read_servo_angle_list[0],'read_right_angle':read_servo_angle_list[1]})
