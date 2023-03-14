@@ -1,7 +1,7 @@
 '''
 Date: 2023-02-21 14:26:07
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-03-11 21:01:55
+LastEditTime: 2023-03-14 11:46:09
 FilePath: /script/run_robot_double_stepless_1_exp_1.py
 '''
 
@@ -182,8 +182,8 @@ def T200_Servo_command():
         read_servo_angle_list = Servo.sync_Read_Angle()
 
         with open(csv_log_file,'a') as file:
-            writer = csv.DictWriter(file, fieldnames=['Timestamp_log','left_angle','right_angle','left_thrust','right_thrust','read_left_angle','read_right_angle'])
-            writer.writerow({'Timestamp_log':current_time,'left_angle':left_angle,'right_angle':right_angle,'left_thrust':left_thrust,'right_thrust':right_thrust,'read_left_angle':read_servo_angle_list[0],'read_right_angle':read_servo_angle_list[1]})
+            writer = csv.DictWriter(file, fieldnames=['Timestamp_log','left_angle','right_angle','left_thrust','right_thrust','read_left_angle','read_right_angle']
+            'left_thrust':left_thrust,'right_thrust':right_thrust,'read_left_angle':read_servo_angle_list[0],'read_right_angle':read_servo_angle_list[1]})
         # time.sleep(0.001)
 
         file.close() 

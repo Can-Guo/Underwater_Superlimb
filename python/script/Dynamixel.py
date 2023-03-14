@@ -1,7 +1,7 @@
 '''
 Date: 2022-07-27 21:48:24
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-03-13 17:17:01
+LastEditTime: 2023-03-14 15:02:08
 FilePath: /script/Dynamixel.py
 '''
 

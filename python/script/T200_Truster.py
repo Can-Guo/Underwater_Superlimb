@@ -1,7 +1,7 @@
 '''
 Date: 2022-07-27 21:48:46
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-03-11 20:21:48
+LastEditTime: 2023-03-14 15:01:21
 FilePath: /script/T200_Truster.py
 '''
 
@@ -68,7 +68,6 @@ class T200_Class:
 
     def send_T200_PWM_Width(self, pulse_width):
         # pulse_width = (pulse_width)
-
         for i in range(2):
             self.pi.set_servo_pulsewidth(
                 self.T200_pins[i], pulse_width[i]

@@ -1,7 +1,7 @@
 '''
 Date: 2023-03-12 00:35:49
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-03-14 10:43:47
+LastEditTime: 2023-03-14 20:45:53
 FilePath: /script/run_robot_stepless_exp_2.py
 '''
 
@@ -33,7 +33,7 @@ print("Initialize the T200 and Servo is Successful!")
 
 
 ## 1. initialize the UDP communication 
-port = 3300
+port = 3344
 socket_pi = Socket.socket(Socket.AF_INET, Socket.SOCK_STREAM)
 socket_pi.settimeout(5000)
 socket_pi.connect(("10.12.234.126",port))
@@ -98,11 +98,11 @@ def T200_Servo_command():
         Decoded_mode_strength_first = decodeClient(msgFromServer.decode('utf-8'))
 
         if(len(Decoded_mode_strength_first)<2):
-            continue
+            flag = 0
 
         else:
             if(len(Decoded_mode_strength_first)<2):
-                pass
+                flag = 0
             else:
                 print("From Server:",Decoded_mode_strength_first)
                 
@@ -177,41 +177,39 @@ def T200_Servo_command():
                 #     right_angle= -90
             elif Decoded_mode_strength_first[1]=='Q':
                 flag = 0
-                print("Accept the Quit Command:Q!\r\n")
+                print("Accepted Reset Command:Q!\r\n")
 
-            if flag ==0:
-                left_angle =0
-                right_angle=0
-                left_thrust=1500
-                right_thrust=1500
-                print("Quit the System!\r\n")
+        if flag == 0:
+            left_angle =0
+            right_angle=0
+            left_thrust=1500
+            right_thrust=1500
+            print("Reset to Home Position!\r\n")
 
-            ## send command to servo and thruster
-            
-            if left_thrust>=1600:
-                left_thrust=1600
-            elif left_thrust<=1400:
-                left_thrust=1400
-            
-            if right_thrust>=1600:
-                right_thrust=1600
-            elif right_thrust<=1400:
-                right_thrust=1400
+        ## send command to servo and thruster
+        
+        if left_thrust>=1600:
+            left_thrust=1600
+        elif left_thrust<=1400:
+            left_thrust=1400
+        
+        if right_thrust>=1600:
+            right_thrust=1600
+        elif right_thrust<=1400:
+            right_thrust=1400
 
-            print("Left_Angle:%d Right_Angle:%d Left_Thrust:%d Right_Thrust:%d" % (left_angle,right_angle,left_thrust,right_thrust))    
-            T200_thruster.send_T200_PWM_Width([left_thrust,right_thrust])
-            
-            current_time = datetime.now()
-            Servo.sync_Write_Angle([left_angle,right_angle])
-            # time.sleep(0.5)
-            read_servo_angle_list = Servo.sync_Read_Angle()
-            
-            with open(csv_log_file,'a') as file:
-                writer = csv.DictWriter(file, fieldnames=['Timestamp_log','left_angle','right_angle','left_thrust','right_thrust','read_left_angle','read_right_angle'])
-                writer.writerow({'Timestamp_log':current_time,'left_angle':left_angle,'right_angle':right_angle,'left_thrust':left_thrust,'right_thrust':right_thrust,'read_left_angle':read_servo_angle_list[0],'read_right_angle':read_servo_angle_list[1]})
-            # time.sleep(0.001)
+        T200_thruster.send_T200_PWM_Width([left_thrust,right_thrust])
+        current_time = datetime.now()
+        Servo.sync_Write_Angle([left_angle,right_angle])
+        read_servo_angle_list = Servo.sync_Read_Angle()
+        
+        with open(csv_log_file,'a') as file:
+            writer = csv.DictWriter(file, fieldnames=['Timestamp_log','left_angle','right_angle','left_thrust','right_thrust','read_left_angle','read_right_angle'])
+            writer.writerow({'Timestamp_log':current_time,'left_angle':left_angle,'right_angle':right_angle,'left_thrust':left_thrust,'right_thrust':right_thrust,
+            'read_left_angle':read_servo_angle_list[0],'read_right_angle':read_servo_angle_list[1]})
+            print("Time and Data",current_time,left_angle,right_angle,left_thrust,right_thrust,read_servo_angle_list)
 
-            file.close() 
+        file.close() 
 
 if __name__ == '__main__':
     T200_Servo_command()

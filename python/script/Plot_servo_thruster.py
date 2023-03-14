@@ -1,7 +1,7 @@
 '''
 Date: 2023-03-12 22:27:05
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-03-13 15:01:27
+LastEditTime: 2023-03-14 22:56:42
 FilePath: /script/Plot_servo_thruster.py
 '''
 
@@ -51,7 +51,9 @@ def plot_servo_thrust_static(csv_file):
 
     Time_Sequences = time_sequence(servo_thrust_value[:,0])
     # print("Time_Sequence:",Time_Sequences)
-
+    # print("Time_sequence:",Time_Sequences)
+    print("\r\n")
+    print("Array:",servo_thrust_value)
     ## control command send to servo and thruster
     left_servo_cmd   = servo_thrust_value[:,1]
     right_servo_cmd  = servo_thrust_value[:,2]
@@ -113,7 +115,7 @@ def plot_servo_thrust_static(csv_file):
 
 
 if __name__ == '__main__':
-    csv_name = '2023-03-11 22:47:12.135232_exp_1_OK_1.csv'
+    csv_name = '2023-03-14 22:43:25.301104.csv'
     plot_servo_thrust_static(csv_name)
 
 
