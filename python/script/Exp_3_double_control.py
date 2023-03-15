@@ -1,17 +1,19 @@
 '''
 Date: 2023-03-14 15:20:45
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-03-14 22:25:59
+LastEditTime: 2023-03-15 22:09:54
 FilePath: /script/Exp_3_double_control.py
 '''
 
 
 import socket as Socket
 
-## socket TCP: ubuntu(server) <==> Raspberry Pi 4B
-port = 3366
+## socket T
+# CP: ubuntu(server) <==> Raspberry Pi 4B
+port = 3377
 s= Socket.socket(Socket.AF_INET, Socket.SOCK_STREAM)
 s.bind(("10.12.234.126",port))
+# s.bind(("192.168.43.201",port))
 s.listen(10)
 client_socket,clienttAddr=s.accept()
 
@@ -19,7 +21,8 @@ client_socket,clienttAddr=s.accept()
 import socket as Socket
 socket_Mi = Socket.socket(Socket.AF_INET, Socket.SOCK_STREAM)
 socket_Mi.settimeout(5000)
-socket_Mi.connect(("10.13.228.137", 8888))
+socket_Mi.connect(("10.13.228.137", 9988))
+# socket_Mi.connect(("192.168.43.156", 8888))
 
 
 ## import libs
@@ -241,19 +244,24 @@ def Double_control(csv_imu_file, csv_command_file):
                 # if(decodeMI(Data_Mi)[0]=='do')
                 
 
-                with open(csv_command_file, 'a') as file:
-                    writer = csv.DictWriter(file, fieldnames=['Timestamp_cmd','imu_cmd','roll_delta','pitch_delta','yaw_delta','voice_type','voice_length'])
-                    writer.writerow({'Timestamp_cmd':timestamp_frame[i],'imu_cmd':next_mode,'roll_delta':roll_record_new[i-last_frame_number[-2]],
-                                     'pitch_delta':pitch_record_new[i-last_frame_number[-2]],'yaw_delta':yaw_record_new[i-last_frame_number[-2]],
-                                     'voice_type':decodeMI(Data_Mi)[0],'voice_length':decodeMI(Data_Mi)[1]})
-                file.close()  
+            with open(csv_command_file, 'a') as file:
+                writer = csv.DictWriter(file, fieldnames=['Timestamp_cmd','imu_cmd','roll_delta','pitch_delta','yaw_delta','voice_type','voice_length'])
+                writer.writerow({'Timestamp_cmd':timestamp_frame[i],'imu_cmd':next_mode,'roll_delta':roll_record_new[i-last_frame_number[-2]],
+                                    'pitch_delta':pitch_record_new[i-last_frame_number[-2]],'yaw_delta':yaw_record_new[i-last_frame_number[-2]],
+                                    'voice_type':decodeMI(Data_Mi)[0],'voice_length':decodeMI(Data_Mi)[1]})
+            file.close()  
 
-                if (voice_last_mode==decodeMI(Data_Mi)[0]) and (decodeMI(Data_Mi)[0]=='do' or decodeMI(Data_Mi)[0]=='re' or decodeMI(Data_Mi)[0]=='me' or decodeMI(Data_Mi)[0]=='fa'):
-                    break
 
-                if (voice_last_mode == 'fa' and next_mode == imu_last_mode and decodeMI(Data_Mi)[0]=='Q'):
-                    print("Don't send!")
-                    break
+            if (voice_last_mode==decodeMI(Data_Mi)[0]) and (decodeMI(Data_Mi)[0]=='do' or decodeMI(Data_Mi)[0]=='re' or decodeMI(Data_Mi)[0]=='me' or decodeMI(Data_Mi)[0]=='fa'):
+                # break
+                # pass 
+                print("DecodeMi", voice_last_mode, decodeMI(Data_Mi[0]))
+
+            else:
+
+            # if (voice_last_mode == 'fa' and next_mode == imu_last_mode and decodeMI(Data_Mi)[0]=='Q'):
+            #     print("Don't send!")
+            #     break
 
                 imu_last_mode = next_mode
 
@@ -265,10 +273,12 @@ def Double_control(csv_imu_file, csv_command_file):
                                 (yaw_record_new[i-last_frame_number[-2]]- yaw_before),
                                 decodeMI(Data_Mi)[0],decodeMI(Data_Mi)[1])
                 
+                # try:
                 client_socket.send(Send_string.encode('utf-8'))
                 print("Sent Message:", Send_string)
-
-       
+                # except:
+                    # print("Sending Failed!\r\n")
+    
 
 def plot_csv_cmd(csv_command_file):
     
