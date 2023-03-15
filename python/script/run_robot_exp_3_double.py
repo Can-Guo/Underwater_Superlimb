@@ -1,7 +1,7 @@
 '''
 Date: 2023-03-14 15:06:39
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-03-14 22:41:21
+LastEditTime: 2023-03-15 22:11:02
 FilePath: /script/run_robot_exp_3_double.py
 '''
 
@@ -34,10 +34,11 @@ print("Initialize the T200 and Servo is Successful!")
 
 
 ## 1. initialize the UDP communication 
-port = 3366
+port = 3377
 socket_pi = Socket.socket(Socket.AF_INET, Socket.SOCK_STREAM)
 socket_pi.settimeout(5000)
 socket_pi.connect(("10.12.234.126",port))
+# socket_pi.connect(("192.168.43.201",port))
 
 
 def creatLogcsv():
@@ -58,14 +59,20 @@ def creatLogcsv():
 
 
 def decodeIMUandMI(Data_Server):
-
+    
     imu_and_voice = Data_Server.split('!')
 
     imu_and_voice_list = imu_and_voice[0].split('#')
     imu_cmd_list = imu_and_voice_list[0].split(',')
-    voice_list = imu_and_voice_list[1].split(',')
+    print("Data_to_Decode", imu_and_voice_list[0])
 
-    return imu_cmd_list, voice_list 
+    if(len(imu_and_voice_list) < 2):
+        print("-----------------------------------------------")
+        return [[' 0','0'],['Q','Q']]
+    else:
+        # len(imu_and_voice_list[0]) == 2:
+        voice_list = imu_and_voice_list[1].split(',')
+        return imu_cmd_list, voice_list 
 
 
 def T200_Servo_command():
@@ -111,8 +118,6 @@ def T200_Servo_command():
             if(len(Decoded_voice_list)<2):
                 flag = 0
             else:
-                
-
                 print("From Server:",Decoded_voice_list)
                 
             if Decoded_voice_list[0]=='do' and Decoded_voice_list[1] =='S':
@@ -128,21 +133,21 @@ def T200_Servo_command():
             elif Decoded_voice_list[0]=='re' and Decoded_voice_list[1] =='L':
                 flag = 5
                 print("Voice is re L!")
-            elif Decoded_voice_list[0]=='me' and Decoded_voice_list[1] =='S':
+            elif Decoded_voice_list[0]=='fa' and Decoded_voice_list[1] =='S':
                 flag = 3
                 print("Voice is me S!")
-            elif Decoded_voice_list[0]=='me' and Decoded_voice_list[1] =='L':
+            elif Decoded_voice_list[0]=='fa' and Decoded_voice_list[1] =='L':
                 flag = 4
                 print("Voice is me L!")
 
-            elif Decoded_voice_list[0]=='fa':#and Decoded_voice_list[1] =='S':
+            elif Decoded_voice_list[0]=='so':#and Decoded_voice_list[1] =='S':
                 flag = 7
                 if(voice_head_flag==1):
                     voice_head_flag=0
                 else:
                     voice_head_flag=1
                 print("Voice is fa !")
-            elif Decoded_voice_list[0]=='so':#and Decoded_voice_list[1] =='L':
+            elif Decoded_voice_list[0]=='me':#and Decoded_voice_list[1] =='L':
                 flag = 8
                 print("Voice is so !")
             
@@ -224,15 +229,15 @@ def T200_Servo_command():
 
         ## send command to servo and thruster
         
-        if left_thrust>=1600:
-            left_thrust=1600
-        elif left_thrust<=1400:
-            left_thrust=1400
+        if left_thrust>=1590:
+            left_thrust=1590
+        elif left_thrust<=1410:
+            left_thrust=1410
         
-        if right_thrust>=1600:
-            right_thrust=1600
-        elif right_thrust<=1400:
-            right_thrust=1400
+        if right_thrust>=1590:
+            right_thrust=1590
+        elif right_thrust<=1410:
+            right_thrust=1410
 
         ## check and abjust the servo angles
         if left_angle>= 90:left_angle=90
