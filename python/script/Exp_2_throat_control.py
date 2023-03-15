@@ -1,7 +1,7 @@
 '''
 Date: 2023-03-10 20:10:46
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-03-12 01:53:20
+LastEditTime: 2023-03-14 20:45:30
 FilePath: /script/Exp_2_throat_control.py
 '''
 
@@ -11,7 +11,7 @@ import time
 
 
 ## socket TCP: ubuntu(server) <==> Raspberry Pi 4B
-port = 3300
+port = 3344
 # ## socket TCP : Ubuntu(server) <==> Raspberry Pi 4B
 s= Socket.socket(Socket.AF_INET, Socket.SOCK_STREAM)
 s.bind(("10.12.234.126",port))
@@ -39,7 +39,7 @@ def encodeMI(data_mi):
 
 if __name__ == '__main__':
 
-    time.sleep(1)
+    time.sleep(0.5)
 
     while(True):
         # print("Waiting!")
