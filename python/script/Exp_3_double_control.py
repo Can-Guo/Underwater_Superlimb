@@ -1,28 +1,29 @@
 '''
 Date: 2023-03-14 15:20:45
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-03-15 22:09:54
+LastEditTime: 2023-03-15 22:46:35
 FilePath: /script/Exp_3_double_control.py
 '''
 
 
 import socket as Socket
 
-## socket T
-# CP: ubuntu(server) <==> Raspberry Pi 4B
-port = 3377
-s= Socket.socket(Socket.AF_INET, Socket.SOCK_STREAM)
-s.bind(("10.12.234.126",port))
-# s.bind(("192.168.43.201",port))
-s.listen(10)
-client_socket,clienttAddr=s.accept()
+# ## socket T
+# # CP: ubuntu(server) <==> Raspberry Pi 4B
+# port = 3377
+# s= Socket.socket(Socket.AF_INET, Socket.SOCK_STREAM)
+# s.bind(("10.12.234.126",port))
 
-## socket TCP : Ubuntu(client) <==> Mi-notebook (server)
-import socket as Socket
-socket_Mi = Socket.socket(Socket.AF_INET, Socket.SOCK_STREAM)
-socket_Mi.settimeout(5000)
-socket_Mi.connect(("10.13.228.137", 9988))
-# socket_Mi.connect(("192.168.43.156", 8888))
+# # s.bind(("192.168.43.201",port))
+# s.listen(10)
+# client_socket,clienttAddr=s.accept()
+
+# ## socket TCP : Ubuntu(client) <==> Mi-notebook (server)
+# import socket as Socket
+# socket_Mi = Socket.socket(Socket.AF_INET, Socket.SOCK_STREAM)
+# socket_Mi.settimeout(5000)
+# socket_Mi.connect(("10.13.228.137", 9988))
+# # socket_Mi.connect(("192.168.43.156", 8888))
 
 
 ## import libs
@@ -326,7 +327,7 @@ def take_str_name(flag):
 
 if __name__ == '__main__':
     
-    record_or_plot = 1
+    record_or_plot = 2
 
     ## Record and transmitte
     if record_or_plot==1:
@@ -337,7 +338,8 @@ if __name__ == '__main__':
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
     # ## Test the results
     elif record_or_plot==2:
-        file_name = take_str_name(flag=2)
+        # file_name = take_str_name(flag=2)
+        file_name = '2023-03-15 22:02:30:39_imu_data.csv'
         print(file_name)
         plot_csv_cmd(file_name)
 

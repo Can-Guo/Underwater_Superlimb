@@ -1,7 +1,7 @@
 '''
 Date: 2023-03-12 22:27:05
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-03-14 22:56:42
+LastEditTime: 2023-03-17 16:27:40
 FilePath: /script/Plot_servo_thruster.py
 '''
 
@@ -71,10 +71,13 @@ def plot_servo_thrust_static(csv_file):
 
     plt.plot(Time_Sequences, left_servo_cmd, 'r-', label = 'Control Command of Left Servo ')
     plt.plot(Time_Sequences, left_servo_read, 'g-.', label = 'Feedback Angle of Left Servo')
-    plt.title("Control Command and Angle Feedback of Left Servo",fontsize=15)
+    # plt.title("Control Command and Angle Feedback of Left Servo",fontsize=15)
 
     plt.xlim(Time_Sequences[0],Time_Sequences[-1])
+    # plt.xlim(0,40)
     plt.ylim([-130,130])
+    plt.xticks(fontsize = 15)
+    plt.yticks(fontsize = 15)
     plt.ylabel("Servo Angle (degree)",fontsize=15)
     # plt.xlabel("Time (second)",fontsize=15)
     plt.legend(fontsize=15)
@@ -83,10 +86,13 @@ def plot_servo_thrust_static(csv_file):
     plt.plot(Time_Sequences, right_servo_cmd, 'b-', label = 'Control Command of Right Servo ')
     plt.plot(Time_Sequences, right_servo_read, 'c-.', label = 'Feedback Angle of Right Servo')
     
-    plt.title("Control Command and Angle Feedback of Right Servo",fontsize=15)
+    # plt.title("Control Command and Angle Feedback of Right Servo",fontsize=15)
 
     plt.xlim(Time_Sequences[0],Time_Sequences[-1])
+    # plt.xlim(0,40)
     plt.ylim([-130,130])
+    plt.xticks(fontsize = 15)
+    plt.yticks(fontsize = 15)
     plt.ylabel("Servo Angle (degree)",fontsize=15)
     # plt.xlabel("Time (second)",fontsize=15)
     plt.legend(fontsize=15)
@@ -96,15 +102,18 @@ def plot_servo_thrust_static(csv_file):
     plt.subplot(3,1,3)
     plt.plot(Time_Sequences, left_thrust_cmd, 'y-', label = 'PWM Command of Left Thruster')
     plt.plot(Time_Sequences, right_thrust_cmd, 'k-.', label = 'PWM Command of Right Thruster')
-    plt.title("Control Command and Angle Feedback of Thrusters",fontsize=15)
+    # plt.title("Control Command of the Left and Right Thrusters",fontsize=15)
 
     
     plt.ylim([1350,1650])
+    plt.xticks(fontsize = 15)
+    plt.yticks(fontsize = 15)
     plt.ylabel("PWM Value of Thrusters",fontsize=15)
     plt.xlabel("Time (second)",fontsize=15)
     plt.legend(fontsize=15)
 
     plt.xlim(Time_Sequences[0],Time_Sequences[-1])
+    # plt.xlim(0,40)
 
     cwd = os.path.abspath('.')
     fig_name = str(cwd) + '/image_servo_thrust/' + str(csv_file_name) + '.png'
@@ -115,7 +124,7 @@ def plot_servo_thrust_static(csv_file):
 
 
 if __name__ == '__main__':
-    csv_name = '2023-03-14 22:43:25.301104.csv'
+    csv_name = '2023-03-14 20:37:51.140216_exp_2_OK_3.csv'
     plot_servo_thrust_static(csv_name)
 
 

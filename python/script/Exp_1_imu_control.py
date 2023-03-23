@@ -1,19 +1,19 @@
 '''
 Date: 2023-03-10 20:10:13
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-03-14 15:42:17
+LastEditTime: 2023-03-23 15:33:52
 FilePath: /script/Exp_1_imu_control.py
 '''
 
 import socket as Socket
 
 ## socket TCP: ubuntu(server) <==> Raspberry Pi 4B
-port = 3300
-## socket TCP : Ubuntu(server) <==> Raspberry Pi 4B
-s= Socket.socket(Socket.AF_INET, Socket.SOCK_STREAM)
-s.bind(("10.12.234.126",port))
-s.listen(10)
-client_socket,clienttAddr=s.accept()
+# port = 3300
+# ## socket TCP : Ubuntu(server) <==> Raspberry Pi 4B
+# s= Socket.socket(Socket.AF_INET, Socket.SOCK_STREAM)
+# s.bind(("10.12.234.126",port))
+# s.listen(10)
+# client_socket,clienttAddr=s.accept()
 
 ## import libs
 import time
@@ -135,14 +135,14 @@ def IMU_control(csv_imu_file, csv_command_file):
                 writer.writerow({'Timestamp_cmd':timestamp_frame_one[i],'imu_cmd':next_mode, 
                                  'roll_delta':roll_record_before[i],
                                  'pitch_delta':pitch_record_before[i],'yaw_delta':yaw_record_before[i]})
-            
+
             file.close()
 
         print("Last Frame Number: %d", last_frame_number)
 
         # Socekt Message Sending
         Send_string = encodeIMU_control(next_mode, roll_before, pitch_before, yaw_before)
-        client_socket.send(Send_string.encode('utf-8'))
+        # client_socket.send(Send_string.encode('utf-8'))
 
         print("send for Once!\r\n") 
 
@@ -210,7 +210,7 @@ def IMU_control(csv_imu_file, csv_command_file):
                                                 (pitch_record_new[i-last_frame_number[-2]] - pitch_before),
                                                 (yaw_record_new[i-last_frame_number[-2]]- yaw_before))
                 
-                client_socket.send(Send_string.encode('utf-8'))
+                # client_socket.send(Send_string.encode('utf-8'))
 
 
 def plot_csv_cmd(csv_command_file):
@@ -223,7 +223,7 @@ def plot_csv_cmd(csv_command_file):
     data_list = np.array(data_frame)
     frame_number = data_list.shape[0]
 
-    time_sequence = np.linspace(0, frame_number/100, frame_number)
+    time_sequence = np.linspace(0, frame_number/13.5, frame_number)
     
     ax1 = plt.subplot(2,1,1)
     plt.plot(time_sequence,data_list[:,0], 'c-', label='command_index')
@@ -270,7 +270,8 @@ if __name__ == '__main__':
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
     # ## Test the results
     elif record_or_plot==2:
-        file_name = take_str_name(flag=2)
+        # file_name = take_str_name(flag=2)
+        file_name = '2023-03-15 22:02:30:39_imu_data.csv'
         print(file_name)
         plot_csv_cmd(file_name)
     
