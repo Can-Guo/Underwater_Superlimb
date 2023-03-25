@@ -1,7 +1,7 @@
 '''
 Date: 2022-07-27 21:48:46
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-03-15 14:56:06
+LastEditTime: 2023-03-24 17:07:21
 FilePath: /script/T200_Truster.py
 '''
 
@@ -46,7 +46,7 @@ class T200_Class:
         # initialize the T200 via PWM control
         self.initialize_T200_PWM()
         # waiting for the T200 Thruster to settle and initialization of the POWER
-        time.sleep(10)
+        time.sleep(5)
         print("Initialize T200 is done!")
     
 
@@ -84,13 +84,13 @@ class T200_Class:
 
 #####################
 # Test of the T200_Class 
-# T200 = T200_Class()
-# # T200.send_T200_PWM_Width([1550,1550])
+T200 = T200_Class()
+# T200.send_T200_PWM_Width([1450,1450])
 
 
-# time.sleep(1)
-# T200.send_T200_PWM_Width([1500,1500])
 
+T200.send_T200_PWM_Width([1500,1500])
+time.sleep(8)
 #####################
 
     

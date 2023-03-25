@@ -1,7 +1,7 @@
 '''
 Date: 2022-07-27 21:48:16
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-03-10 17:14:04
+LastEditTime: 2023-03-24 17:26:53
 FilePath: /script/IMU_Microstrain.py
 '''
 
@@ -302,7 +302,7 @@ class Microstrain_Class(object):
         return fig_name
 
 
-    def parseDataStream_Number(self, Timeout_ms: int, PacketNumber, accel_enable=False, euler_enable = True):
+    def parseDataStream_Number(self, Timeout_ms: int, PacketNumber, accel_enable=True, euler_enable = True):
 
         try:
             # get all the packets that have been collected, with a timeout of Timeout_ms miliseconds
@@ -338,21 +338,21 @@ class Microstrain_Class(object):
                     for dataPoint in points:
 
                         if dataPoint.channelName() == 'scaledAccelX':
-                            accel_x = dataPoint.as_float()
+                            accel_x = dataPoint.as_float() * 9.8
                         if dataPoint.channelName() == 'scaledAccelY':
-                            accel_y = dataPoint.as_float()
+                            accel_y = dataPoint.as_float() * 9.8
                         if dataPoint.channelName() == 'scaledAccelZ':
-                            accel_z = dataPoint.as_float()
+                            accel_z = dataPoint.as_float() * 9.8
                     
                         if dataPoint.channelName() == 'roll':
-                            roll = dataPoint.as_float()
+                            roll = dataPoint.as_float() * 180.0 / np.pi
                         if dataPoint.channelName() == 'pitch':
-                            pitch = dataPoint.as_float()
+                            pitch = dataPoint.as_float() * 180.0 / np.pi
                         if dataPoint.channelName() == 'yaw':
-                            yaw = dataPoint.as_float()
+                            yaw = dataPoint.as_float() * 180.0 / np.pi
 
                 # print("Accel and Euler:", accel_x,accel_y,accel_z,roll,pitch,yaw)
-                return [accel_x,accel_y,accel_z,roll,pitch,yaw]
+                    return [round(accel_x,2),round(accel_y,2),round(accel_z,2),round(roll,2),round(pitch,2),round(yaw,2)]
                 
                     # print("Data Frame: %-20s" % dataPoint.channelName() + " |  %10s"  % dataPoint.as_string())
 
@@ -373,11 +373,11 @@ class Microstrain_Class(object):
 
                 for dataPoint in points:
                     if dataPoint.channelName() == 'roll':
-                        roll = dataPoint.as_float()
+                        roll = dataPoint.as_float() * 180/np.pi
                     if dataPoint.channelName() == 'pitch':
-                        pitch = dataPoint.as_float()
+                        pitch = dataPoint.as_float() * 180/np.pi
                     if dataPoint.channelName() == 'yaw':
-                        yaw = dataPoint.as_float()
+                        yaw = dataPoint.as_float() * 180/np.pi
                     if dataPoint.channelName() == 'scaledAccelX':
                         accel_x = dataPoint.as_float()
                     if dataPoint.channelName() == 'scaledAccelY':
@@ -393,24 +393,25 @@ class Microstrain_Class(object):
 
                 
                 AccelXYZ = np.array([accel_x, accel_y, accel_z])
-                GyroXYZ = np.array([gyro_x, gyro_y, gyro_z])
+                # GyroXYZ = np.array([gyro_x, gyro_y, gyro_z])
                 EulerXYZ = np.array([roll, pitch, yaw])
 
-                self.Accel_Microstrain = np.roll(self.Accel_Microstrain, -3)
-                self.Gyro_Microstrain = np.roll(self.Gyro_Microstrain, -3)
-                self.Euler_Microstrain = np.roll(self.Euler_Microstrain, -3)
+                # self.Accel_Microstrain = np.roll(self.Accel_Microstrain, -3)
+                # self.Gyro_Microstrain = np.roll(self.Gyro_Microstrain, -3)
+                # self.Euler_Microstrain = np.roll(self.Euler_Microstrain, -3)
 
-                self.Accel_Microstrain[self.LEN-1,:] = AccelXYZ
-                self.Gyro_Microstrain[self.LEN-1,: ] = GyroXYZ
-                self.Euler_Microstrain[self.LEN-1,:] = EulerXYZ
+                # self.Accel_Microstrain[self.LEN-1,:] = AccelXYZ
+                # self.Gyro_Microstrain[self.LEN-1,: ] = GyroXYZ
+                # self.Euler_Microstrain[self.LEN-1,:] = EulerXYZ
     
-                print(self.Accel_Microstrain)
+                # print(self.Euler_Microstrain)
+                print(EulerXYZ)
 
         # return
 
 
 ################################################
-# Microstrain = Microstrain_Class(SampleRate=100)
+# Microstrain = Microstrain_Class(SampleRate=10)
 # Microstrain.setToIdle()
 # accel_enable = True; euler_enable = True
 # Microstrain.configIMUChannel(accel_enable,0,euler_enable)
@@ -426,7 +427,7 @@ class Microstrain_Class(object):
 
 # 4. parse packets of the data stream to update the
 # latest IMU data into Class properties
-# Microstrain.parseDataStrean_Loop(200)
+# Microstrain.parseDataStrean_Loop(10)
 
 # Microstrain.setToIdle()
 
