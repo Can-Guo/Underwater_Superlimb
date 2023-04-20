@@ -1,7 +1,7 @@
 '''
 Date: 2023-04-17 14:14:24
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-04-19 10:47:26
+LastEditTime: 2023-04-20 17:01:37
 FilePath: /script/run_robot_spherical_coord.py
 '''
 
@@ -19,12 +19,8 @@ import time
 import numpy as np 
 import socket as Socket
 
-
-## 1. initialize the TCP communication 
-port = 8888
-socket_pi = Socket.socket(Socket.AF_INET, Socket.SOCK_STREAM)
-socket_pi.settimeout(5000)
-socket_pi.connect(("10.24.24.199",port))
+last_imu_data_list = [0.0,0.0,0.0,0.0,0.0,0.0]
+imu_data_list_str = ['0','0','0','0','0','0']
 
 
 ## 2. initial the control library of T200 Thruster
@@ -49,11 +45,48 @@ Servo.disable_Torque()
 print("Initialize the T200 and Servo is Successful!")
 
 
+## 1. initialize the TCP communication 
+port = 8888
+socket_pi = Socket.socket(Socket.AF_INET, Socket.SOCK_STREAM)
+socket_pi.settimeout(5000)
+socket_pi.connect(("10.24.24.199",port))
+
+
 def decode_imu_data(Data_Server):
+    global last_imu_data_list
+    global imu_data_list_str
+    # print("Data Server",Data_Server)
 
     imu_frame = Data_Server.split('!')
-    imu_data_list = imu_frame[-1].split(',')
-    print("Data Decoded:", imu_data_list)
+    # print("imu_frame",imu_frame)
+
+    if len(imu_frame) >= 1:
+        imu_data_list_str = imu_frame[0].split(',')
+        
+    # elif len(imu_frame) == 1:
+    #     # imu_data_list_str = imu_frame[1].split(',')
+    #     imu_data_list_str = imu_frame.split(',')
+
+    # print("IMU Frame",imu_data_list_str)
+
+    if len(imu_data_list_str)==6:
+        
+        imu_data_list = [0.0,0.0,0.0,0.0,0.0,0.0]
+        imu_data_list[0] = round(float(imu_data_list_str[0]),2)
+        imu_data_list[1] = round(float(imu_data_list_str[1]),2)
+        imu_data_list[2] = round(float(imu_data_list_str[2]),2)
+        imu_data_list[3] = round(float(imu_data_list_str[3]),2)
+        imu_data_list[4] = round(float(imu_data_list_str[4]),2)
+        imu_data_list[5] = round(float(imu_data_list_str[5]),2)
+
+        print("Data Decoded:", imu_data_list)
+        last_imu_data_list = imu_data_list
+        return imu_data_list
+        
+    else:
+        # last_imu_data_list = imu_data_list
+        print("Last IMU:", last_imu_data_list)
+        return last_imu_data_list
 
 
 ## Function to create a data logger as CSV file
@@ -93,6 +126,7 @@ def main(angle_expected):
         roll_0_list.append(imu_data_calibration[3])
         pitch_0_list.append(imu_data_calibration[4])
         yaw_0_list.append(imu_data_calibration[5])
+        time.sleep(0.05)
         
 
     roll_0 = np.mean(roll_0_list)
@@ -104,15 +138,17 @@ def main(angle_expected):
     print("Calibration of the IMU data is done!\r\n")
     
     ## initial the angle error
-    angle_error = angle_expected
+    angle_error_last = angle_expected
 
     i = 0
     K_p = 1.0
     K_d = 0.2
-    left_angle = 0
-    right_angle = 0
+    left_angle = -90
+    right_angle = -110
     left_thrust = 1500
     right_thrust = 1500 
+    left_thrust_last = 1500
+    right_thrust_last = 1500
 
     # start = time.time()
 
@@ -122,7 +158,7 @@ def main(angle_expected):
         msgFromServer = socket_pi.recv(1024)
         imu_data_lastest = decode_imu_data(msgFromServer.decode('utf-8'))
 
-        angle_error = -(imu_data_lastest[4] - angle_expected)
+        angle_error = -(imu_data_lastest[3] - angle_expected)
 
         # time stamp access
         time_stamp = datetime.now() 
@@ -151,7 +187,7 @@ def main(angle_expected):
                 left_thrust = left_thrust_last
                 right_thrust = right_thrust_last
                 
-        print("angle_error %f, Delta_thrust %f.")
+        print("angle_error %f, Delta_thrust %f.",angle_error,delta_Thrust)
 
         # 4.3 Check the control of the Thruster
         MIN = 1430
@@ -205,7 +241,7 @@ def main(angle_expected):
 
 if __name__ == '__main__':
     
-    angle_exp = 30
+    angle_exp = -30
     main(angle_expected=angle_exp)
 
 

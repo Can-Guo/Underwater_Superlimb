@@ -1,7 +1,7 @@
 '''
 Date: 2022-07-27 21:48:24
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-03-24 21:11:57
+LastEditTime: 2023-04-20 15:17:04
 FilePath: /script/Dynamixel.py
 '''
 
@@ -273,9 +273,9 @@ class Servo_Class(object):
 # Servo = Servo_Class(PortName, 57600)
 
 # Servo.enable_Torque()
-# Servo.sync_Write_Angle([0,166])
+# Servo.sync_Write_Angle([-90,-110])
 
-# time.sleep(2)
+# time.sleep(1)
 # for i in range(50):
 #     Servo.sync_Read_Angle()
 #     print("Servo Angle ID 1: %.3f \t ID 2: %.3f" % (Servo.dxl_ID_present_Angle[1],Servo.dxl_ID_present_Angle[1]))
