@@ -1,7 +1,7 @@
 /*
  * @Date: 2023-01-12 11:33:13
  * @LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
- * @LastEditTime: 2023-03-10 01:48:44
+ * @LastEditTime: 2023-04-17 14:24:19
  * @FilePath: /script/cpp/Microstrain_IMU_cpp.h
  */
 
@@ -463,7 +463,7 @@ string AHRS_IMU::createCSV()
 
     // access the path to meet your personal system path.
     fs::path path_object = fs::current_path();
-    string filename = string(path_object.parent_path().parent_path()) + "/csv_imu_0310/" + string(time.erase(time.size()-1)) + "_imu_data.csv";
+    string filename = string(path_object.parent_path().parent_path()) + "/csv_imu_0417/" + string(time.erase(time.size()-1)) + "_imu_data.csv";
 
     ofstream fout(filename.c_str());
 
