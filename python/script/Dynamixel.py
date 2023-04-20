@@ -1,7 +1,7 @@
 '''
 Date: 2022-07-27 21:48:24
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-04-20 15:17:04
+LastEditTime: 2023-04-21 01:59:58
 FilePath: /script/Dynamixel.py
 '''
 
@@ -269,13 +269,13 @@ class Servo_Class(object):
 
 ############################################
 
-# PortName = '/dev/ttyUSB0'
-# Servo = Servo_Class(PortName, 57600)
+PortName = '/dev/ttyUSB0'
+Servo = Servo_Class(PortName, 57600)
 
-# Servo.enable_Torque()
-# Servo.sync_Write_Angle([-90,-110])
+Servo.enable_Torque()
+Servo.sync_Write_Angle([0,160])
 
-# time.sleep(1)
+time.sleep(1)
 # for i in range(50):
 #     Servo.sync_Read_Angle()
 #     print("Servo Angle ID 1: %.3f \t ID 2: %.3f" % (Servo.dxl_ID_present_Angle[1],Servo.dxl_ID_present_Angle[1]))
@@ -298,6 +298,6 @@ class Servo_Class(object):
 # time.sleep(2)
 # Servo.sync_Write_Angle([0,0])
 # time.sleep(1)
-# Servo.disable_Torque()
+Servo.disable_Torque()
 
 ############################################
