@@ -1,7 +1,7 @@
 '''
 Date: 2023-04-17 14:14:24
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-04-21 02:50:11
+LastEditTime: 2023-05-05 13:39:55
 FilePath: /script/run_robot_spherical_coord.py
 '''
 
@@ -31,8 +31,8 @@ print("Initilize the T200 ...")
 
 
 ## 3. initial the control SDK of Dynamixel XW540-T140-R servo
-left_angle_init = 0
-right_angle_init = 160
+left_angle_init = -90
+right_angle_init = -110
 
 PortName = '/dev/ttyUSB0'
 Servo = Servo_Class(PortName, 57600)                             
@@ -118,7 +118,7 @@ def main(angle_expected):
     yaw_0_list = []
 
     # 4.1 Calibration of the IMU data of the initial status
-    for i in range(100):
+    for i in range(50):
         ## receive the imu data from IMU device (@Ubuntu PC)
         msgFromServer = socket_pi.recv(1024)
         imu_data_calibration = decode_imu_data(msgFromServer.decode('utf-8'))
@@ -141,7 +141,7 @@ def main(angle_expected):
     angle_error_last = angle_expected
 
     i = 0
-    K_p = 2.0
+    K_p = 1.3
     K_d = 0.2
     left_angle = 0
     right_angle = 160
@@ -158,7 +158,7 @@ def main(angle_expected):
         msgFromServer = socket_pi.recv(1024)
         imu_data_lastest = decode_imu_data(msgFromServer.decode('utf-8'))
 
-        angle_error = -(imu_data_lastest[5] - angle_expected)
+        angle_error = (imu_data_lastest[3] - angle_expected)
 
         # time stamp access
         time_stamp = datetime.now() 
@@ -172,26 +172,26 @@ def main(angle_expected):
 
         if (angle_error>0):
     
-            right_thrust = 1470 - (int)(delta_Thrust) 
-            left_thrust  = 1525 + (int)(delta_Thrust)
+            right_thrust = 1470 - (int)(delta_Thrust) *1.0
+            left_thrust  = 1530 + (int)(delta_Thrust)
 
-            if(np.abs(angle_error)<2):
+            if(np.abs(angle_error)<6):
                 left_thrust = left_thrust_last
                 right_thrust = right_thrust_last
 
         elif(angle_error<0):
-            right_thrust = 1470 - (int)(delta_Thrust) 
-            left_thrust  = 1525 + (int)(delta_Thrust)
+            right_thrust = 1470 + (int)(delta_Thrust) 
+            left_thrust  = 1530 - (int)(delta_Thrust)
 
-            if(np.abs(angle_error)<2):
+            if(np.abs(angle_error)<6):
                 left_thrust = left_thrust_last
                 right_thrust = right_thrust_last
                 
         print("angle_error %f, Delta_thrust %f." % (angle_error,delta_Thrust))
 
         # 4.3 Check the control of the Thruster
-        MIN = 1440
-        MAX = 1560
+        MIN = 1439
+        MAX = 1562
 
         if left_thrust <= MIN:
             left_thrust = MIN
@@ -230,7 +230,7 @@ def main(angle_expected):
 
         i += 1
 
-        if i>= 300:
+        if i>= 200:
             T200.send_T200_PWM_Width([1500,1500])
             exit()
         
@@ -241,7 +241,7 @@ def main(angle_expected):
 
 if __name__ == '__main__':
     
-    angle_exp = -120
+    angle_exp = -25
     main(angle_expected=angle_exp)
 
 

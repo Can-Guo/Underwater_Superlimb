@@ -1,0 +1,3 @@
+Timestamp_log,left_angle,right_angle,left_thrust,right_thrust,read_left_angle,read_right_angle,accel_x,accel_y,accel_z,roll,pitch,yaw,error
+2023-05-05 10-33-25-991286,0,160,1550,1450,-89.956,-109.741,-0.84,-0.41,-9.74,2.22,-5.06,174.7,32.22
+2023-05-05 10-33-26-063140,0,160,1550,1450,-89.956,-109.741,-0.84,-0.39,-9.73,2.22,-5.07,174.7,32.22
