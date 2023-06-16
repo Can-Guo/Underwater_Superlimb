@@ -1,8 +1,8 @@
 '''
 Date: 2022-11-14 16:28:57
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-02-09 22:42:30
-FilePath: /script/Voice_Base.py
+LastEditTime: 2023-03-08 16:25:16
+FilePath: /thesis_draw/home/guoyucan/bionic/github/Underwater_Superlimb/python/script/Voice_Base.py
 '''
 
 import csv 
@@ -690,7 +690,7 @@ AU = Voice_Base(path='./Voice_WAV/voice_0117_wav/WZJ_single_pitch_0209/mi_1.wav'
 
 ####
 # # 功能 1: Record Audio
-AU.audiorecorder(len=10)
+# AU.audiorecorder(len=10)
 
 ####
 ## 功能 2: Read Audio File, into data in list
@@ -717,6 +717,7 @@ data_one= data_Two[:,1]   # 选择其中一个轨道的数据
 ####
 ## 功能3: Noise Reduction
 reduced_data = AU.noise_reduce(voice_data=data_one, sample_rate=16000)
+# reduced_data = data_one
 # reduced_data = AU.noise_reduce(voice_data=reduced_data, sample_rate=16000)
 data_one /= np.max(data_one)  # 归一化数据尺度
 

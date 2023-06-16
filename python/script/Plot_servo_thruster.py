@@ -1,7 +1,7 @@
 '''
 Date: 2023-03-12 22:27:05
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-03-17 16:27:40
+LastEditTime: 2023-05-22 00:43:56
 FilePath: /script/Plot_servo_thruster.py
 '''
 
@@ -52,8 +52,8 @@ def plot_servo_thrust_static(csv_file):
     Time_Sequences = time_sequence(servo_thrust_value[:,0])
     # print("Time_Sequence:",Time_Sequences)
     # print("Time_sequence:",Time_Sequences)
-    print("\r\n")
-    print("Array:",servo_thrust_value)
+    # print("\r\n")
+    # print("Array:",servo_thrust_value)
     ## control command send to servo and thruster
     left_servo_cmd   = servo_thrust_value[:,1]
     right_servo_cmd  = servo_thrust_value[:,2]
@@ -76,8 +76,8 @@ def plot_servo_thrust_static(csv_file):
     plt.xlim(Time_Sequences[0],Time_Sequences[-1])
     # plt.xlim(0,40)
     plt.ylim([-130,130])
-    plt.xticks(fontsize = 15)
-    plt.yticks(fontsize = 15)
+    plt.xticks(fontsize = 20)
+    plt.yticks(fontsize = 20)
     plt.ylabel("Servo Angle (degree)",fontsize=15)
     # plt.xlabel("Time (second)",fontsize=15)
     plt.legend(fontsize=15)
@@ -91,8 +91,8 @@ def plot_servo_thrust_static(csv_file):
     plt.xlim(Time_Sequences[0],Time_Sequences[-1])
     # plt.xlim(0,40)
     plt.ylim([-130,130])
-    plt.xticks(fontsize = 15)
-    plt.yticks(fontsize = 15)
+    plt.xticks(fontsize = 20)
+    plt.yticks(fontsize = 20)
     plt.ylabel("Servo Angle (degree)",fontsize=15)
     # plt.xlabel("Time (second)",fontsize=15)
     plt.legend(fontsize=15)
@@ -106,10 +106,10 @@ def plot_servo_thrust_static(csv_file):
 
     
     plt.ylim([1350,1650])
-    plt.xticks(fontsize = 15)
-    plt.yticks(fontsize = 15)
+    plt.xticks(fontsize = 20)
+    plt.yticks(fontsize = 20)
     plt.ylabel("PWM Value of Thrusters",fontsize=15)
-    plt.xlabel("Time (second)",fontsize=15)
+    plt.xlabel("Time (second)",fontsize=20)
     plt.legend(fontsize=15)
 
     plt.xlim(Time_Sequences[0],Time_Sequences[-1])
@@ -124,7 +124,9 @@ def plot_servo_thrust_static(csv_file):
 
 
 if __name__ == '__main__':
-    csv_name = '2023-03-14 20:37:51.140216_exp_2_OK_3.csv'
+    # csv_name = '2023-03-11 22:47:12.135232_exp_1_OK_1 copy.csv'
+    # csv_name = '2023-03-14 20:37:51.140216_exp_2_OK_3.csv'
+    csv_name = '2023-03-15 22:02:48.727275_exp_3_half_ok_2.csv'
     plot_servo_thrust_static(csv_name)
 
 

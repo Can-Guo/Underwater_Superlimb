@@ -1,7 +1,7 @@
 '''
 Date: 2023-03-10 20:10:13
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-03-23 15:33:52
+LastEditTime: 2023-05-21 23:39:54
 FilePath: /script/Exp_1_imu_control.py
 '''
 
@@ -271,7 +271,7 @@ if __name__ == '__main__':
     # ## Test the results
     elif record_or_plot==2:
         # file_name = take_str_name(flag=2)
-        file_name = '2023-03-15 22:02:30:39_imu_data.csv'
+        file_name = '2023-03-11 22:46:47:80_imu_data_exp_1_OK copy.csv'
         print(file_name)
         plot_csv_cmd(file_name)
     

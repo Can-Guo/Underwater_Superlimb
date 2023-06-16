@@ -1,7 +1,7 @@
 '''
 Date: 2022-07-27 21:48:16
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-03-24 17:26:53
+LastEditTime: 2023-05-22 23:12:31
 FilePath: /script/IMU_Microstrain.py
 '''
 
@@ -411,7 +411,7 @@ class Microstrain_Class(object):
 
 
 ################################################
-# Microstrain = Microstrain_Class(SampleRate=10)
+Microstrain = Microstrain_Class(SampleRate=10)
 # Microstrain.setToIdle()
 # accel_enable = True; euler_enable = True
 # Microstrain.configIMUChannel(accel_enable,0,euler_enable)
@@ -423,7 +423,7 @@ class Microstrain_Class(object):
 # Microstrain.recordDataToCSV(0,1)
 
 # 3. plot data into Figure, and save into a PNG image
-# Microstrain.plotDataCSV('2023-02-15 05:40:54:35_imu_data.csv')
+Microstrain.plotDataCSV('2023-02-15 05:40:54:35_imu_data.csv')
 
 # 4. parse packets of the data stream to update the
 # latest IMU data into Class properties

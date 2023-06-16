@@ -1,7 +1,7 @@
 '''
 Date: 2023-03-13 16:18:42
 LastEditors: Guo Yuqin,12032421@mail.sustech.edu.cn
-LastEditTime: 2023-03-13 22:19:24
+LastEditTime: 2023-05-22 23:25:31
 FilePath: /script/Test_Servo.py
 '''
 
@@ -10,7 +10,7 @@ import csv
 import time 
 import pandas as pd 
 from datetime import datetime
-from Dynamixel import Servo_Class
+# from Dynamixel import Servo_Class
 import numpy as np 
 import matplotlib.pyplot as plt 
 import scienceplots
@@ -145,7 +145,7 @@ def plot_servo_animation(csv_file_name):
     left_angle_rt = servo_frame_list[:,2]
     right_angle_rt = servo_frame_list[:,3]
 
-    plt.figure(figsize=[20,10])
+    plt.figure(figsize=[20,8])
 
     start_time = datetime.now()
     
@@ -220,7 +220,7 @@ def plot_servo_static(csv_file_name):
     left_angle_rt = servo_frame_list[:,2]
     right_angle_rt = servo_frame_list[:,3]
 
-    plt.figure(figsize=(20,10))
+    plt.figure(figsize=(20,8.8))
 
     ax1 = plt.subplot(2,1,1)
     plt.plot(time_sequence, left_angle_cmd, 'r-', label = 'left_angle_command')
@@ -230,12 +230,12 @@ def plot_servo_static(csv_file_name):
     plt.ylim([-110, 110])
     plt.xlim(0,time_sequence[-1])
 
-    plt.xticks(fontsize = 15)
-    plt.yticks(fontsize = 15)
+    plt.xticks(fontsize = 20)
+    plt.yticks(fontsize = 20)
 
-    plt.ylabel('Angle of Servos (degree)', fontsize = 20)
+    plt.ylabel('Angle of Servos (degree)', fontsize = 18)
 
-    plt.legend(fontsize = 15)        
+    plt.legend(loc='upper right',fontsize = 20)
 
     ax2 = plt.subplot(2,1,2)
     plt.plot(time_sequence,  right_angle_cmd, 'r-', label = 'right_angle_command')
@@ -247,13 +247,13 @@ def plot_servo_static(csv_file_name):
     plt.ylim([-110, 110])
     plt.xlim(0,time_sequence[-1])
 
-    plt.xticks(fontsize = 15)
-    plt.yticks(fontsize = 15)
+    plt.xticks(fontsize = 20)
+    plt.yticks(fontsize = 20)
 
-    plt.ylabel('Angle of Servos (degree)', fontsize = 20)
+    plt.ylabel('Angle of Servos (degree)', fontsize = 18)
     plt.xlabel("Time(second)",fontsize=20)
     
-    plt.legend(fontsize = 15)
+    plt.legend(loc='upper right',fontsize = 20)
 
     # current = datetime.now()
     cwd = os.path.abspath('.')
@@ -273,7 +273,8 @@ if __name__ == '__main__':
     # Method 2: Plot the servo angle figure
     # plot_servo_animation('2023-03-13 21:32:00.939927_test_servo.csv')
 
-    plot_servo_static('2023-03-13 22:17:57.945619_test_servo_sine.csv')
+    # plot_servo_static('2023-03-13 22:17:57.945619_test_servo_sine.csv')
+    plot_servo_static('2023-03-13 22:15:35.763586_test_servo_step.csv')
 
     
 
